@@ -99,3 +99,8 @@ class CPEItem(DBEntry):
         res.append(self.name)
         return res
 
+    def __str__(self):
+        """
+        """
+        return self.name
+

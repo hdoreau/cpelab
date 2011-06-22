@@ -82,3 +82,9 @@ class NmapOSItem(DBEntry):
         res.append(self.device_type)
         return res
 
+    def __str__(self):
+        """
+        """
+        return '%s %s %s %s %s' % (self.title, self.vendor, self.family, \
+            self.generation, self.device_type)
+
