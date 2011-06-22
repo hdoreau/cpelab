@@ -59,8 +59,8 @@ class NmapOS(Database):
 
         elif line.startswith('Class'):
             fp_meta = line.replace('Class', '', 1)
-            fp_meta = [x.strip() for x in fp_meta.split('|')]
-            fp_meta.insert(0, self._item_title)
+            fp_meta = [x.strip().lower() for x in fp_meta.split('|')]
+            fp_meta.insert(0, self._item_title.lower())
             os = NmapOSItem(*fp_meta)
 
             self.entries.append(os)
