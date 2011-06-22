@@ -103,5 +103,5 @@ class DBEntry:
     def get_fields(self):
         """
         """
-        raise NotImplementedError('Abstract method subclasses must implement')
+        return [self.title, self.vendor]
 
