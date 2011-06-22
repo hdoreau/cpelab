@@ -1,0 +1,13 @@
+
+CPELAB
+
+cpelab is part of a project aiming to bring CPE computation to OpenVAS and nmap.
+I am developing this as a testing environment to experiment with CPE's.
+
+Ultimately this should lead to code generators able to provide translation tools
+to convert nmap OS and services detection results into CPE's. Same mechanisms
+could then be used to make nmap directly CPE-able.
+
+
+Henri Doreau
+<henri.doreau greenbone net>
