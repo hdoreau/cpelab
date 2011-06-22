@@ -9,5 +9,17 @@ to convert nmap OS and services detection results into CPE's. Same mechanisms
 could then be used to make nmap directly CPE-able.
 
 
+INSTALL:
+
+1: create a "data" directory to store the databases
+  $ mkdir data
+
+2: download the bases
+  $ ./labctl update all
+
+3: try
+  $ ./labctl stats
+
+
 Henri Doreau
 <henri.doreau greenbone net>
