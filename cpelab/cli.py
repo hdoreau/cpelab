@@ -31,9 +31,14 @@ import sys
 from cpelab.databases.nmapos import NmapOS
 from cpelab.databases.cpedict import CPEDict
 
+from cpelab.auxiliary.comparison import VendorDiff
+
 
 # List of available databases
 DB_MAP = {NmapOS.str_id: NmapOS, CPEDict.str_id: CPEDict}
+
+# List of available processing modules
+MOD_MAP = {VendorDiff.str_id: VendorDiff}
 
 
 class LabCLI:
@@ -46,7 +51,7 @@ class LabCLI:
         try:
             self.run_cmd()
         except IndexError:
-            raise LabCLIError('Invalid command line (missing arguments)')
+            raise LabCLIError('Invalid command line: missing arguments')
 
     def run_cmd(self):
         """quickly parse command line and execute desired actions"""
@@ -56,8 +61,12 @@ class LabCLI:
             self._cmd_stats(sys.argv[2])
         elif self._args[1] == 'search':
             self._cmd_search(self._args[2], self._args[3])
+        elif self._args[1] == 'run':
+           self._cmd_run_aux(self._args[2])
+        elif self._args[1] == 'help':
+           self._cmd_help_aux(self._args[2])
         else:
-            raise LabCLIError('Invalid command line (unknown command: %s)' % sys.argv[1])
+            raise LabCLIError('Unknown command: %s' % sys.argv[1])
 
     def _cmd_update(self, db):
         """update existing DB (or create them)"""
@@ -80,6 +89,30 @@ class LabCLI:
                 for match in res:
                     print '%s' % str(match)
 
+    def _cmd_run_aux(self, modname):
+        """run external processing module"""
+        if not MOD_MAP.has_key(modname):
+            raise LabCLIError('Unknown auxiliary module: %s' % modname)
+
+        # Initialize and run module
+        module = MOD_MAP[modname]()
+        mod_args = []
+        for arg in self._args[3::]:
+            if not DB_MAP.has_key(arg):
+                raise LabCLIError('Invalid DB name: %s' % arg)
+            mod_args.append(DB_MAP[arg]())
+        module.start(mod_args)
+
+    def _cmd_help_aux(self, modname):
+        """display help for a specific external processing module"""
+        if not MOD_MAP.has_key(modname):
+            raise LabCLIError('Unknown auxiliary module: %s' % modname)
+
+        # Initialize and run module
+        module = MOD_MAP[modname]
+        module.display_help()
+
+
 class LabCLIError(Exception):
     """base exception raised on CLI execution errors"""
 
@@ -95,14 +128,20 @@ def db_iter(db_spec):
 
 def usage(reason=''):
     """print usage hint and exit"""
+    dblist = ' '.join(DB_MAP.keys())
+    modlist = ' '.join(MOD_MAP.keys())
+
     sys.exit("""%s
-Usage: cpelab [cmd] <parameters>
+Usage: cpelab <cmd> <parameters...>
 commands:
   update <db>         Download latest versions of the selected db
   stats  <db>         Display statistics about installed db
   search <item> <db>  Look for entries matching <item> in <db>
+  run <module> <...>  Run external processing module
+  help <module>       Display help for external processing module <module>
 
-available databases: %s all""" % (reason, ' '.join(DB_MAP.keys())))
+available databases: %s all
+available modules: %s""" % (reason, dblist, modlist))
 
 def main():
     """cpelab CLI entry point"""
