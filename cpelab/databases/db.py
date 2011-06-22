@@ -79,7 +79,7 @@ class Database:
         """
         dest = cls.local_filename()
 
-        print '[+] Updating %s...' % str(cls)
+        print '[+] Updating %s...' % str(cls.str_id)
         resp = urllib2.urlopen(cls.remote)
         fout = open(dest, 'w')
         fout.write(resp.read())
