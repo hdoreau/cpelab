@@ -60,7 +60,13 @@ class CPEDictParser(ContentHandler):
     def startElement(self, name, attrs):
         """callback: entering section"""
         if name == 'cpe-item' and not attrs.has_key('deprecated'):
-            self._name = attrs['name']
+            name = attrs['name']
+
+            # Only deal with o and h entries
+            # TODO fork this model to have two distinct database instances for
+            # OS's and applications
+            if not name.lower().startswith('cpe:/a:'):
+                self._name = name
         elif name == 'title' and attrs['xml:lang'] == 'en-US':
             self._in_title = True
 
