@@ -43,7 +43,10 @@ class LabCLI:
     def __init__(self, args=sys.argv):
         """instanciate a new CLI"""
         self._args = args
-        self.run_cmd()
+        try:
+            self.run_cmd()
+        except IndexError:
+            raise LabCLIError('Invalid command line (missing arguments)')
 
     def run_cmd(self):
         """quickly parse command line and execute desired actions"""
@@ -54,7 +57,7 @@ class LabCLI:
         elif self._args[1] == 'search':
             self._cmd_search(self._args[2], self._args[3])
         else:
-            raise LabCLIError('Invalid command line')
+            raise LabCLIError('Invalid command line (unknown command: %s)' % sys.argv[1])
 
     def _cmd_update(self, db):
         """update existing DB (or create them)"""
