@@ -25,8 +25,6 @@
 
 """Processing modules to perform DB comparisons"""
 
-import sys
-
 
 class AuxModule:
     """
@@ -40,7 +38,7 @@ class AuxModule:
         raise NotImplementedError('Abstract method subclasses must implement')
 
     @classmethod
-    def display_help(cls):
+    def help_msg(cls):
         """
         """
         raise NotImplementedError('Abstract method subclasses must implement')
@@ -55,14 +53,17 @@ class VendorDiff(AuxModule):
         """
         """
         if len(targets) != 2:
-            VendorDiff.display_help('Invalid arguments')
+            raise AuxModuleError('Invalid arguments')
 
     @classmethod
-    def display_help(cls, err=''):
+    def help_msg(cls, err=''):
         """
         """
-        sys.exit("""%s
+        return """%s
 Module usage: labctl run %s <db0> <db1>
 This module performs comparison between vendors listed in two given
-databases.""" % (err, VendorDiff.str_id))
+databases.""" % (err, VendorDiff.str_id)
+
+class AuxModuleError(Exception):
+    """base error for auxiliary module"""
 

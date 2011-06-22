@@ -31,7 +31,7 @@ import sys
 from cpelab.databases.nmapos import NmapOS
 from cpelab.databases.cpedict import CPEDict
 
-from cpelab.auxiliary.comparison import VendorDiff
+from cpelab.auxiliary.comparison import VendorDiff, AuxModuleError
 
 
 # List of available databases
@@ -101,7 +101,10 @@ class LabCLI:
             if not DB_MAP.has_key(arg):
                 raise LabCLIError('Invalid DB name: %s' % arg)
             mod_args.append(DB_MAP[arg]())
-        module.start(mod_args)
+        try:
+            module.start(mod_args)
+        except AuxModuleError, err:
+            sys.exit(module.__class__.help_msg(err=str(err)))
 
     def _cmd_help_aux(self, modname):
         """display help for a specific external processing module"""
@@ -110,11 +113,11 @@ class LabCLI:
 
         # Initialize and run module
         module = MOD_MAP[modname]
-        module.display_help()
-
+        sys.exit(module.help_msg())
 
 class LabCLIError(Exception):
     """base exception raised on CLI execution errors"""
+
 
 def db_iter(db_spec):
     """iterate over a selection of databases"""
