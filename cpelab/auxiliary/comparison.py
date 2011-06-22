@@ -49,11 +49,50 @@ class VendorDiff(AuxModule):
 
     str_id = 'vendor-diff'
 
+    def __init__(self):
+        """
+        """
+        self._db0_vendors = {}
+        self._db1_vendors = {}
+
     def start(self, targets):
         """
         """
         if len(targets) != 2:
             raise AuxModuleError('Invalid arguments')
+
+        self._load_vendors(targets[0], targets[1])
+        self._compute_diff()
+        self._display_results()
+
+    def _load_vendors(self, db0, db1):
+        """
+        """
+        for entries in db0.entries:
+            self._db0_vendors[entries.vendor] = 1
+
+        for entries in db1.entries:
+            self._db1_vendors[entries.vendor] = 1
+
+    def _compute_diff(self):
+        """
+        """
+        for vendor in self._db0_vendors.iterkeys():
+            if self._db1_vendors.has_key(vendor):
+                self._db0_vendors[vendor] = 0
+
+        for vendor in self._db1_vendors.iterkeys():
+            if not self._db0_vendors.has_key(vendor):
+                self._db0_vendors[vendor] = -1
+
+    def _display_results(self):
+        """
+        """
+        for k, v in self._db0_vendors.iteritems():
+            if v == -1:
+                print '- %s' % k
+            elif v == 1:
+                print '+ %s' % k
 
     @classmethod
     def help_msg(cls, err=''):
