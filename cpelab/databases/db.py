@@ -92,16 +92,13 @@ class Database:
         return os.path.join(os.getcwd(), 'data', cls.local)
 
 class DBEntry:
-    """
-    """
+    """Represent a single database item"""
     def __init__(self, title, vendor):
-        """
-        """
+        """instanciate a new item"""
         self.title = title
         self.vendor = vendor
 
     def get_fields(self):
-        """
-        """
+        """return the values composing this item"""
         return [self.title, self.vendor]
 
