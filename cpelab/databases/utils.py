@@ -34,12 +34,10 @@ DB_MAP = {NmapOS.str_id: NmapOS, CPEDict.str_id: CPEDict}
 
 def db_iter(db_spec):
     """iterate over a selection of databases"""
-    if db_spec != 'all' and not DB_MAP.has_key(db_spec):
-        raise LabCLIError('Invalid DB name: %s' % db_spec)
-
-    for k, v in DB_MAP.iteritems():
-        if db_spec == k or db_spec == 'all':
-            yield v
+    if db_spec == 'all' or DB_MAP.has_key(db_spec):
+        for k, v in DB_MAP.iteritems():
+            if db_spec == k or db_spec == 'all':
+                yield v
 
 def get_db(db_spec):
     """get DB by name"""
