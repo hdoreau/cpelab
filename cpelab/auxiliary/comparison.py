@@ -37,8 +37,7 @@ class VendorDiff(AuxModule):
 
     def __init__(self):
         """instanciate a new module"""
-        self._db0_vendors = {}
-        self._db1_vendors = {}
+        self._diff_vendors = {}
 
     def start(self, targets):
         """module entry point. targets is a list of (two) db instances to
@@ -52,32 +51,30 @@ class VendorDiff(AuxModule):
 
     def _compute_diff(self, db0, db1):
         """Mark vendors as belonging to db0 only, db0 and db1 or db1 only"""
-        for entries in db0.entries:
-            self._db0_vendors[entries.vendor] = 1
+        for entry in db0.entries:
+            self._diff_vendors[entry.vendor] = 0
 
-        for entries in db1.entries:
-            self._db1_vendors[entries.vendor] = 1
-
-        for vendor in self._db0_vendors.iterkeys():
-            if self._db1_vendors.has_key(vendor):
-                self._db0_vendors[vendor] = 0
-
-        for vendor in self._db1_vendors.iterkeys():
-            if not self._db0_vendors.has_key(vendor):
-                self._db0_vendors[vendor] = -1
+        for entry in db1.entries:
+            if not self._diff_vendors.has_key(entry.vendor):
+                self._diff_vendors[entry.vendor] = 1
+            elif self._diff_vendors[entry.vendor] == 0:
+                # this entry exists in both dictionary: delete it
+                del self._diff_vendors[entry.vendor]
 
     def _display_results(self):
         """Display diff results in a diff-like fashion.
-        
+
         - Vendors that are present in both db are ignored
         - Vendors that are only present in db0 are preceeded by '+'
         - Vendors that are only present in db1 are preceeded by '-'
         """
-        for k, v in self._db0_vendors.iteritems():
-            if v == -1:
-                print '- %s' % k
-            elif v == 1:
+        for k, v in self._diff_vendors.iteritems():
+            if v == 0:
+                # only in db0
                 print '+ %s' % k
+            elif v == 1:
+                # only in db1
+                print '- %s' % k
 
     @classmethod
     def help_msg(cls, err=''):
