@@ -62,9 +62,9 @@ class LabCLI:
         elif self._args[1] == 'search':
             self._cmd_search(self._args[2], self._args[3])
         elif self._args[1] == 'run':
-           self._cmd_run_aux(self._args[2])
+            self._cmd_run_aux(self._args[2])
         elif self._args[1] == 'help':
-           self._cmd_help_aux(self._args[2])
+            self._cmd_help_aux(self._args[2])
         else:
             raise LabCLIError('Unknown command: %s' % sys.argv[1])
 
