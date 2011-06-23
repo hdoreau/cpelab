@@ -18,7 +18,9 @@ INSTALL:
   $ ./labctl update all
 
 3: try
-  $ ./labctl stats
+  $ ./labctl
+  <help message>
+  $ ./labctl stats all
 
 
 Henri Doreau
