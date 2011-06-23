@@ -36,7 +36,7 @@ class Tool:
         """instanciate new processing module"""
         pass
 
-    def start(self):
+    def start(self, args):
         """module entry point"""
         raise NotImplementedError('Abstract method subclasses must implement')
 
