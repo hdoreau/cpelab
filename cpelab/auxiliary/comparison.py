@@ -25,23 +25,8 @@
 
 """Processing modules to perform DB comparisons"""
 
+from cpelab.auxiliary.auxmod import AuxModule, AuxModuleError
 
-class AuxModule:
-    """
-    """
-
-    str_id = None
-
-    def start(self):
-        """
-        """
-        raise NotImplementedError('Abstract method subclasses must implement')
-
-    @classmethod
-    def help_msg(cls):
-        """
-        """
-        raise NotImplementedError('Abstract method subclasses must implement')
 
 class VendorDiff(AuxModule):
     """
@@ -102,7 +87,4 @@ class VendorDiff(AuxModule):
 Module usage: labctl run %s <db0> <db1>
 This module performs comparison between vendors listed in two given
 databases.""" % (err, VendorDiff.str_id)
-
-class AuxModuleError(Exception):
-    """base error for auxiliary module"""
 
