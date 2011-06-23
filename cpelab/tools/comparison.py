@@ -25,10 +25,10 @@
 
 """Processing modules to perform DB comparisons"""
 
-from cpelab.auxiliary.auxmod import AuxModule, AuxModuleError
+from cpelab.tools.toolbase import Tool, RuntimeToolError
 
 
-class VendorDiff(AuxModule):
+class VendorDiff(Tool):
     """this module performs a diff between vendors contained in two given
     databases. The result is displayed in a "diff-like" fashion. See the
     _display_results docstring for more information
@@ -37,7 +37,7 @@ class VendorDiff(AuxModule):
 
     def __init__(self):
         """instanciate a new module"""
-        AuxModule.__init__(self)
+        Tool.__init__(self)
         self._diff_vendors = {}
 
     def start(self, targets):
@@ -45,7 +45,7 @@ class VendorDiff(AuxModule):
         compare
         """
         if len(targets) != 2:
-            raise AuxModuleError('Invalid arguments')
+            raise RuntimeToolError('Invalid arguments')
 
         self._compute_diff(targets[0], targets[1])
         self._display_results()

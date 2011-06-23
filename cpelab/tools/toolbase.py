@@ -23,11 +23,11 @@
 ##
 
 
-"""Base classes for auxiliary processing modules"""
+"""Base classes for processing modules"""
 
 
-class AuxModule:
-    """abstract class for auxiliary modules."""
+class Tool:
+    """abstract base class for processing modules."""
     str_id = None
 
     def __init__(self):
@@ -45,6 +45,6 @@ class AuxModule:
         """
         raise NotImplementedError('Abstract method subclasses must implement')
 
-class AuxModuleError(Exception):
-    """base error for auxiliary module"""
+class RuntimeToolError(Exception):
+    """base error for unexpected conditions while running tools"""
 

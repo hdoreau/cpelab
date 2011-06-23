@@ -31,8 +31,8 @@ import sys
 from cpelab.databases.nmapos import NmapOS
 from cpelab.databases.cpedict import CPEDict
 
-from cpelab.auxiliary.auxmod import AuxModuleError
-from cpelab.auxiliary.comparison import VendorDiff
+from cpelab.tools.toolbase import RuntimeToolError
+from cpelab.tools.comparison import VendorDiff
 
 
 # List of available databases
@@ -104,7 +104,7 @@ class LabCLI:
             mod_args.append(DB_MAP[arg]())
         try:
             module.start(mod_args)
-        except AuxModuleError, err:
+        except RuntimeToolError, err:
             sys.exit(module.__class__.help_msg(err=str(err)))
 
     def _cmd_help_aux(self, modname):
