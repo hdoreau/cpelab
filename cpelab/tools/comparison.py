@@ -26,6 +26,7 @@
 """Processing modules to perform DB comparisons"""
 
 from cpelab.tools.toolbase import Tool, RuntimeToolError
+from cpelab.databases.utils import get_db
 
 
 class VendorDiff(Tool):
@@ -47,7 +48,15 @@ class VendorDiff(Tool):
         if len(targets) != 2:
             raise RuntimeToolError('Invalid arguments')
 
-        self._compute_diff(targets[0], targets[1])
+        db0 = get_db(targets[0])
+        db1 = get_db(targets[1])
+
+        if db0 is None:
+            raise RuntimeToolError('Unknown database: %s' % targets[0])
+        if db1 is None:
+            raise RuntimeToolError('Unknown database: %s' % targets[1])
+
+        self._compute_diff(db0(), db1())
         self._display_results()
 
     def _compute_diff(self, db0, db1):
@@ -79,9 +88,8 @@ class VendorDiff(Tool):
 
     @classmethod
     def help_msg(cls, err=''):
-        """return help message for this command"""
+        """return help message for the vendor-diff command"""
         return """%s
-Command usage: labctl run %s <db0> <db1>
-This command performs comparison between vendors listed in two given
-databases.""" % (err, VendorDiff.str_id)
+Usage: labctl %s <db0> <db1>
+Compares vendor entries between two databases.""" % (err, VendorDiff.str_id)
 

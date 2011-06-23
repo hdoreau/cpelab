@@ -28,18 +28,18 @@
 
 import sys
 
-from cpelab.databases.nmapos import NmapOS
-from cpelab.databases.cpedict import CPEDict
-
-from cpelab.tools.toolbase import RuntimeToolError
+from cpelab.databases.utils import db_iter 
+from cpelab.tools.toolbase import RuntimeToolError, UpdateDB, StatsDB, SearchDB
 from cpelab.tools.comparison import VendorDiff
 
 
-# List of available databases
-DB_MAP = {NmapOS.str_id: NmapOS, CPEDict.str_id: CPEDict}
-
 # List of available processing modules
-MOD_MAP = {VendorDiff.str_id: VendorDiff}
+TOOLS_MAP = {
+    UpdateDB.str_id: UpdateDB,
+    StatsDB.str_id: StatsDB,
+    SearchDB.str_id: SearchDB,
+    VendorDiff.str_id: VendorDiff
+}
 
 
 class LabCLI:
@@ -56,96 +56,44 @@ class LabCLI:
 
     def run_cmd(self):
         """quickly parse command line and execute desired actions"""
-        if self._args[1] == 'update':
-            self._cmd_update(self._args[2])
-        elif self._args[1] == 'stats':
-            self._cmd_stats(sys.argv[2])
-        elif self._args[1] == 'search':
-            self._cmd_search(self._args[2], self._args[3])
-        elif self._args[1] == 'run':
-            self._cmd_run_aux(self._args[2])
-        elif self._args[1] == 'help':
-            self._cmd_help_aux(self._args[2])
-        else:
-            raise LabCLIError('Unknown command: %s' % sys.argv[1])
+        cmd = self._args[1]
 
-    def _cmd_update(self, db):
-        """update existing DB (or create them)"""
-        for db_ref in db_iter(db):
-            db_ref.create_or_update()
+        if cmd == 'help':
+            # specific case for help, which is not implemented as a tool
+            sys.exit(self._cmd_help(self._args[2]))
 
-    def _cmd_stats(self, db):
-        """compute and display statistics about existing databases"""
-        for db_ref in db_iter(db):
-            db_ref().display_info()
+        if not TOOLS_MAP.has_key(cmd):
+            raise LabCLIError('Unknown command: %s' % cmd)
 
-    def _cmd_search(self, item, db):
-        """look for a given pattern in the selected database"""
-        for db_ref in db_iter(db):
-            res = db_ref().lookup(item)
-            if len(res) == 0:
-                print '%s: nothing found' % db_ref.str_id
-            else:
-                print '%s:' % db_ref.str_id
-                for match in res:
-                    print '%s' % str(match)
-
-    def _cmd_run_aux(self, modname):
-        """run external processing module"""
-        if not MOD_MAP.has_key(modname):
-            raise LabCLIError('Unknown auxiliary module: %s' % modname)
-
-        # Initialize and run module
-        module = MOD_MAP[modname]()
-        mod_args = []
-        for arg in self._args[3::]:
-            if not DB_MAP.has_key(arg):
-                raise LabCLIError('Invalid DB name: %s' % arg)
-            mod_args.append(DB_MAP[arg]())
+        tool = TOOLS_MAP[cmd]
         try:
-            module.start(mod_args)
+            tool().start(self._args[2::])
         except RuntimeToolError, err:
-            sys.exit(module.__class__.help_msg(err=str(err)))
+            sys.exit(tool.help_msg(err=str(err)))
 
-    def _cmd_help_aux(self, modname):
+    def _cmd_help(self, modname):
         """display help for a specific external processing module"""
-        if not MOD_MAP.has_key(modname):
-            raise LabCLIError('Unknown auxiliary module: %s' % modname)
-
-        # Initialize and run module
-        module = MOD_MAP[modname]
-        sys.exit(module.help_msg())
+        if TOOLS_MAP.has_key(modname):
+            return TOOLS_MAP[modname].help_msg()
+        raise LabCLIError('Unknown command: %s' % modname)
 
 class LabCLIError(Exception):
     """base exception raised on CLI execution errors"""
 
 
-def db_iter(db_spec):
-    """iterate over a selection of databases"""
-    if db_spec != 'all' and not DB_MAP.has_key(db_spec):
-        raise LabCLIError('Invalid DB name: %s' % db_spec)
-
-    for k, v in DB_MAP.iteritems():
-        if db_spec == k or db_spec == 'all':
-            yield v
-
-
 def usage(reason=''):
     """print usage hint and exit"""
-    dblist = ' '.join(DB_MAP.keys())
-    modlist = ' '.join(MOD_MAP.keys())
+    dblist = ' '.join([x.str_id for x in db_iter('all')])
+    modlist = '\n  '.join(TOOLS_MAP.keys())
 
     sys.exit("""%s
-Usage: cpelab <cmd> <parameters...>
+Usage: cpelab <cmd> [parameters...]
 commands:
-  update <db>         Download latest versions of the selected db
-  stats  <db>         Display statistics about installed db
-  search <item> <db>  Look for entries matching <item> in <db>
-  run <module> <...>  Run external processing module
-  help <module>       Display help for external processing module <module>
+  help <modname>  Display help for a given command
 
-available databases: %s all
-available modules: %s""" % (reason, dblist, modlist))
+  %s
+
+available databases: %s all""" % (reason, modlist, dblist))
 
 def main():
     """cpelab CLI entry point"""
