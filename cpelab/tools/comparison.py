@@ -57,7 +57,6 @@ class BaseComparator(Tool):
         """comparison function. Compute and display resutls"""
         raise NotImplementedError('Abstract method subclasses must implement')
 
-
 class VendorDiff(BaseComparator):
     """this tool performs a diff between vendors contained in two given
     databases. The result is displayed in a "diff-like" fashion. See the
