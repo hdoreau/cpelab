@@ -65,7 +65,7 @@ class UpdateDB(Tool):
         """return help message for the update command"""
         return """%s
 Usage: labctl %s <db>
-Download and extract the given database(s)""" % (err, UpdateDB.str_id)
+Download and extract the given database(s)""" % (err, cls.str_id)
 
 class StatsDB(Tool):
     """
@@ -85,7 +85,7 @@ class StatsDB(Tool):
         """return help message for the stats command"""
         return """%s
 Usage: labctl %s <db>
-Display statistics about the given database(s)""" % (err, StatsDB.str_id)
+Display statistics about the given database(s)""" % (err, cls.str_id)
 
 class SearchDB(Tool):
     """
@@ -114,7 +114,7 @@ class SearchDB(Tool):
         """return help message for the search command"""
         return """%s
 Usage: labctl %s <pattern> <db>
-Look for a pattern in the given database(s)""" % (err, SearchDB.str_id)
+Look for a pattern in the given database(s)""" % (err, cls.str_id)
 
 class RuntimeToolError(Exception):
     """base error for unexpected conditions while running tools"""

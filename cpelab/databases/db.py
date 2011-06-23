@@ -50,10 +50,10 @@ class Database:
     def display_info(self):
         """print statistics and factoids about the DB"""
         if not self.loaded:
-            print '%s: not loaded' % self.__class__.str_id
+            print '%s: not loaded' % self.str_id
             return
 
-        print '%s:' % self.__class__.str_id
+        print '%s:' % self.str_id
         print '\t%d entries loaded' % len(self.entries)
 
         fp_metacount = {}
