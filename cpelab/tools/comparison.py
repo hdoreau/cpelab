@@ -41,20 +41,20 @@ class VendorDiff(Tool):
         Tool.__init__(self)
         self._diff_vendors = {}
 
-    def start(self, targets):
+    def start(self, args):
         """tool entry point. targets is a list of (two) db instances to
         compare
         """
-        if len(targets) != 2:
+        if len(args) != 2:
             raise RuntimeToolError('Invalid arguments')
 
-        db0 = get_db(targets[0])
-        db1 = get_db(targets[1])
+        db0 = get_db(args[0])
+        db1 = get_db(args[1])
 
         if db0 is None:
-            raise RuntimeToolError('Unknown database: %s' % targets[0])
+            raise RuntimeToolError('Unknown database: %s' % args[0])
         if db1 is None:
-            raise RuntimeToolError('Unknown database: %s' % targets[1])
+            raise RuntimeToolError('Unknown database: %s' % args[1])
 
         self._compute_diff(db0(), db1())
         self._display_results()
