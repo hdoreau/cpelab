@@ -94,11 +94,14 @@ class SearchDB(Tool):
 
     def start(self, args):
         """look for a given pattern in the selected database"""
-        if len(args) != 1:
+        if len(args) != 2:
             raise RuntimeToolError('Invalid command line')
 
-        for db_ref in db_iter(args[0]):
-            res = db_ref().lookup(item)
+        pattern = args[0]
+        db_spec = args[1]
+
+        for db_ref in db_iter(db_spec):
+            res = db_ref().lookup(pattern)
             if len(res) == 0:
                 print '%s: nothing found' % db_ref.str_id
             else:
