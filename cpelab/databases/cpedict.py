@@ -34,7 +34,7 @@ from cpelab.databases.db import Database, DBEntry
 
 class CPEDict(Database):
     """CPE dictionnary"""
-    
+
     remote = 'http://static.nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.2.xml'
     local = 'cpe_dict.xml'
     str_id = 'cpe-dict'
@@ -90,8 +90,22 @@ class CPEItem(DBEntry):
     """represent a single entry from the CPE dictionary"""
     def __init__(self, title, name):
         """instanciate a new entry"""
-        DBEntry.__init__(self, title, name.split(':')[2])
+        DBEntry.__init__(self, title, '')
+
         self.name = name
+
+        name = name.replace('cpe:/', '')
+        items = name.split(':')
+        while len(items) < 7:
+            items.append('')
+
+        self.part = items[0]
+        self.vendor = items[1]
+        self.product = items[2]
+        self.version = items[3]
+        self.udpate = items[4]
+        self.edition = items[5]
+        self.language = items[6]
 
     def get_fields(self):
         """get the list of available values for this entry"""
