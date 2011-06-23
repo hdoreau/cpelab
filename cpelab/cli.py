@@ -31,7 +31,8 @@ import sys
 from cpelab.databases.nmapos import NmapOS
 from cpelab.databases.cpedict import CPEDict
 
-from cpelab.auxiliary.comparison import VendorDiff, AuxModuleError
+from cpelab.auxiliary.auxmod import AuxModuleError
+from cpelab.auxiliary.comparison import VendorDiff
 
 
 # List of available databases
