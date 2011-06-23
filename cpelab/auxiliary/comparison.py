@@ -37,6 +37,7 @@ class VendorDiff(AuxModule):
 
     def __init__(self):
         """instanciate a new module"""
+        AuxModule.__init__(self)
         self._diff_vendors = {}
 
     def start(self, targets):

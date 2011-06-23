@@ -30,6 +30,10 @@ class AuxModule:
     """abstract class for auxiliary modules."""
     str_id = None
 
+    def __init__(self):
+        """instanciate new processing module"""
+        pass
+
     def start(self):
         """module entry point"""
         raise NotImplementedError('Abstract method subclasses must implement')
