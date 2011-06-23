@@ -27,19 +27,17 @@
 
 
 class AuxModule:
-    """
-    """
-
+    """abstract class for auxiliary modules."""
     str_id = None
 
     def start(self):
-        """
-        """
+        """module entry point"""
         raise NotImplementedError('Abstract method subclasses must implement')
 
     @classmethod
     def help_msg(cls):
-        """
+        """class method to return the syntaxic help message for this specific
+        module
         """
         raise NotImplementedError('Abstract method subclasses must implement')
 
