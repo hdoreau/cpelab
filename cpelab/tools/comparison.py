@@ -29,19 +29,19 @@ from cpelab.tools.toolbase import Tool, RuntimeToolError
 
 
 class VendorDiff(Tool):
-    """this module performs a diff between vendors contained in two given
+    """this tool performs a diff between vendors contained in two given
     databases. The result is displayed in a "diff-like" fashion. See the
     _display_results docstring for more information
     """
     str_id = 'vendor-diff'
 
     def __init__(self):
-        """instanciate a new module"""
+        """instanciate a new VendorDiff tool"""
         Tool.__init__(self)
         self._diff_vendors = {}
 
     def start(self, targets):
-        """module entry point. targets is a list of (two) db instances to
+        """tool entry point. targets is a list of (two) db instances to
         compare
         """
         if len(targets) != 2:
@@ -79,9 +79,9 @@ class VendorDiff(Tool):
 
     @classmethod
     def help_msg(cls, err=''):
-        """return help message for this module"""
+        """return help message for this command"""
         return """%s
-Module usage: labctl run %s <db0> <db1>
-This module performs comparison between vendors listed in two given
+Command usage: labctl run %s <db0> <db1>
+This command performs comparison between vendors listed in two given
 databases.""" % (err, VendorDiff.str_id)
 

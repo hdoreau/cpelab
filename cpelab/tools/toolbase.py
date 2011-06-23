@@ -41,7 +41,7 @@ class Tool:
     @classmethod
     def help_msg(cls):
         """class method to return the syntaxic help message for this specific
-        module
+        command
         """
         raise NotImplementedError('Abstract method subclasses must implement')
 
