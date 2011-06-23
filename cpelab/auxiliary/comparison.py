@@ -47,21 +47,17 @@ class VendorDiff(AuxModule):
         if len(targets) != 2:
             raise AuxModuleError('Invalid arguments')
 
-        self._load_vendors(targets[0], targets[1])
-        self._compute_diff()
+        self._compute_diff(targets[0], targets[1])
         self._display_results()
 
-    def _load_vendors(self, db0, db1):
-        """
-        """
+    def _compute_diff(self, db0, db1):
+        """Mark vendors as belonging to db0 only, db0 and db1 or db1 only"""
         for entries in db0.entries:
             self._db0_vendors[entries.vendor] = 1
 
         for entries in db1.entries:
             self._db1_vendors[entries.vendor] = 1
 
-    def _compute_diff(self):
-        """Mark vendors as belonging to db0 only, db0 and db1 or db1 only"""
         for vendor in self._db0_vendors.iterkeys():
             if self._db1_vendors.has_key(vendor):
                 self._db0_vendors[vendor] = 0
