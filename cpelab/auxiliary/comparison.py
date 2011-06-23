@@ -58,7 +58,7 @@ class VendorDiff(AuxModule):
             if not self._diff_vendors.has_key(entry.vendor):
                 self._diff_vendors[entry.vendor] = 1
             elif self._diff_vendors[entry.vendor] == 0:
-                # this entry exists in both dictionary: delete it
+                # this entry exists in both dictionaries: delete it
                 del self._diff_vendors[entry.vendor]
 
     def _display_results(self):
