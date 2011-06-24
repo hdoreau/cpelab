@@ -48,9 +48,8 @@ class BaseComparator(Tool):
         if db1 is None:
             raise RuntimeToolError('Unknown database: %s' % args[1])
 
-        print 'Loading databases...'
-        db0 = db0.load()
-        db1 = db1.load()
+        db0.load()
+        db1.load()
         self._compare(db0, db1)
 
     def _compare(self, db0, db1):
