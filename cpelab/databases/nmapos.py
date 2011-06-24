@@ -61,9 +61,9 @@ class NmapOS(Database):
             fp_meta = line.replace('Class', '', 1)
             fp_meta = [x.strip().lower() for x in fp_meta.split('|')]
             fp_meta.insert(0, self._item_title.lower())
-            os = NmapOSItem(*fp_meta)
+            os_entry = NmapOSItem(fp_meta)
 
-            self.entries.append(os)
+            self.entries.append(os_entry)
 
     def _storage_filter(self, fin, fout):
         """
@@ -74,24 +74,15 @@ class NmapOS(Database):
 
 class NmapOSItem(DBEntry):
     """represent a single entry from the Nmap OS database"""
-    def __init__(self, title, vendor, family, gen, devtype):
+    def __init__(self, items):
         """instanciate a new entry"""
-        DBEntry.__init__(self, title, vendor)
-        self.family = family
-        self.generation = gen
-        self.device_type = devtype
-
-    def get_fields(self):
-        """get the list of available values for this entry"""
-        res = DBEntry.get_fields(self)
-        res.append(self.family)
-        res.append(self.generation)
-        res.append(self.device_type)
-        return res
+        DBEntry.__init__(self)
+        self.fields['title'] = items[0]
+        self.fields['vendor'] = items[1]
+        self.fields['family'] = items[2]
+        self.fields['generation'] = items[3]
+        self.fields['devtype'] = items[4]
 
     def __str__(self):
-        """
-        """
-        return '%s %s %s %s %s' % (self.title, self.vendor, self.family, \
-            self.generation, self.device_type)
-
+        """return a human readable representation"""
+        return ' '.join(self.fields.values())

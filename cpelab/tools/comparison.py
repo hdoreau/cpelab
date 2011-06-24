@@ -72,13 +72,13 @@ class VendorDiff(BaseComparator):
         """Select vendors that are exclusively in db0 (displayed with a '+'
         prefix) or exclusively in db1 (displayed with a '-' prefix.
         """
-        vendors0 = set([entry.vendor for entry in db0.entries])
-        vendors1 = set([entry.vendor for entry in db1.entries])
+        vendors0 = set([entry.fields['vendor'] for entry in db0.entries])
+        vendors1 = set([entry.fields['vendor'] for entry in db1.entries])
 
         res = vendors0 - vendors1
         for vendor in res:
             print '+ %s' % vendor
-        
+
         res = vendors1 - vendors0
         for vendor in res:
             print '- %s' % vendor
@@ -96,8 +96,8 @@ class VendorCommon(BaseComparator):
 
     def _compare(self, db0, db1):
         """display vendors found in both databases"""
-        vendors0 = set([entry.vendor for entry in db0.entries])
-        vendors1 = set([entry.vendor for entry in db1.entries])
+        vendors0 = set([entry.fields['vendor'] for entry in db0.entries])
+        vendors1 = set([entry.fields['vendor'] for entry in db1.entries])
 
         res = vendors0 & vendors1
         for vendor in res:

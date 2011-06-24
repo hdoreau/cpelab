@@ -138,31 +138,25 @@ class CPEItem(DBEntry):
     """represent a single entry from the CPE dictionary"""
     def __init__(self, title, name):
         """instanciate a new entry"""
-        DBEntry.__init__(self, title, '')
+        DBEntry.__init__(self)
 
-        self.name = name
+        self.fields['title'] = title
+        self.fields['name'] = name
 
         name = name.replace('cpe:/', '')
         items = name.split(':')
         while len(items) < 7:
             items.append('')
 
-        self.part = items[0]
-        self.vendor = items[1]
-        self.product = items[2]
-        self.version = items[3]
-        self.udpate = items[4]
-        self.edition = items[5]
-        self.language = items[6]
-
-    def get_fields(self):
-        """get the list of available values for this entry"""
-        res = DBEntry.get_fields(self)
-        res.append(self.name)
-        return res
+        self.fields['part'] = items[0]
+        self.fields['vendor'] = items[1]
+        self.fields['product'] = items[2]
+        self.fields['version'] = items[3]
+        self.fields['udpate'] = items[4]
+        self.fields['edition'] = items[5]
+        self.fields['language'] = items[6]
 
     def __str__(self):
-        """
-        """
-        return self.name
+        """return a human readable representation"""
+        return self.fields['name']
 
