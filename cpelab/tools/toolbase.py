@@ -78,7 +78,8 @@ class StatsDB(Tool):
             raise RuntimeToolError('Invalid command line')
 
         for db_ref in db_iter(args[0]):
-            db_ref().display_info()
+            db_ref.load()
+            db_ref.display_info()
 
     @classmethod
     def help_msg(cls, err=''):
@@ -101,7 +102,8 @@ class SearchDB(Tool):
         db_spec = args[1]
 
         for db_ref in db_iter(db_spec):
-            res = db_ref().lookup(pattern)
+            db_ref.load()
+            res = db_ref.lookup(pattern)
             if len(res) == 0:
                 print '%s: nothing found' % db_ref.str_id
             else:

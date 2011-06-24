@@ -65,6 +65,13 @@ class NmapOS(Database):
 
             self.entries.append(os)
 
+    def _storage_filter(self, fin, fout):
+        """
+        """
+        for line in fin:
+            if line.startswith('Fingerprint') or line.startswith('Class'):
+                fout.write(line)
+
 class NmapOSItem(DBEntry):
     """represent a single entry from the Nmap OS database"""
     def __init__(self, title, vendor, family, gen, devtype):

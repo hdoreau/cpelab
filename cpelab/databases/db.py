@@ -41,7 +41,6 @@ class Database:
         """instanciate a new DB"""
         self.loaded = False
         self.entries = []
-        self.load()
 
     def load(self):
         """load DB information from the filesystem"""
@@ -72,19 +71,25 @@ class Database:
                     break
         return res
 
-    @classmethod
-    def create_or_update(cls):
+    def create_or_update(self):
         """download latest version of the database from a remote location and
         store it locally
         """
-        dest = cls.local_filename()
+        dest = self.local_filename()
 
-        print '[+] Updating %s...' % str(cls.str_id)
-        resp = urllib2.urlopen(cls.remote)
+        print '[+] Updating %s...' % str(self.str_id)
+        resp = urllib2.urlopen(self.remote)
+
         fout = open(dest, 'w')
-        fout.write(resp.read())
+        self._storage_filter(resp, fout)
+
         fout.close()
         print '[+] OK (see %s)' % dest
+
+    def _storage_filter(self, fin, fout):
+        """
+        """
+        raise NotImplementedError('Abstract method subclasses must implement')
 
     @classmethod
     def local_filename(cls):

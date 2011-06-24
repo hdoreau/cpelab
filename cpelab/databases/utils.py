@@ -37,10 +37,10 @@ def db_iter(db_spec):
     if db_spec == 'all' or DB_MAP.has_key(db_spec):
         for k, v in DB_MAP.iteritems():
             if db_spec == k or db_spec == 'all':
-                yield v
+                yield v()
 
 def get_db(db_spec):
     """get DB by name"""
     if DB_MAP.has_key(db_spec):
-        return DB_MAP[db_spec]
+        return DB_MAP[db_spec]()
 

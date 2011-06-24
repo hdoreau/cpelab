@@ -28,6 +28,7 @@
 import xml.sax
 
 from xml.sax.handler import ContentHandler
+from xml.sax.saxutils import XMLGenerator
 
 from cpelab.databases.db import Database, DBEntry
 
@@ -44,6 +45,53 @@ class CPEDict(Database):
         handler = CPEDictParser(self)
         xml.sax.parse(CPEDict.local_filename(), handler)
         self.loaded = True
+
+    def _storage_filter(self, fin, fout):
+        """
+        """
+        generator = DictOSFilter(fout)
+        xml.sax.parse(fin, generator)
+
+class DictOSFilter(XMLGenerator):
+    """produce a reduced CPE dict with only non-deprecated OS related entries"""
+    def __init__(self, out):
+        """instanciate a new filter"""
+        XMLGenerator.__init__(self, out)
+        self._reproduce = False
+        self._discard_tag = ''
+
+    def startElement(self, name, attrs):
+        """callback: opening tag. Only keep OS related item, discard deprecated
+        entries and non en-US titles.
+        """
+        if name == 'cpe-item' and not attrs.has_key('deprecated'):
+            if not attrs['name'].startswith('cpe:/a'):
+                self._reproduce = True
+                attrs = {'name': attrs['name']} # discard all metadata
+
+        if name == 'meta:item-metadata' or (name == 'title' and attrs['xml:lang'] != 'en-US'):
+            self._discard_tag = name
+            return
+
+        if self._reproduce or name == 'cpe-list':
+            XMLGenerator.startElement(self, name, attrs)
+
+    def endElement(self, name):
+        """callback: ending tag. Reproduce if this was a valid one"""
+        if name == self._discard_tag:
+            self._discard_tag = ''
+            return
+
+        if self._reproduce or name == 'cpe-list':
+            XMLGenerator.endElement(self, name)
+
+        if name == 'cpe-item':
+            self._reproduce = False
+
+    def characters(self, content):
+        """callback: text. reproduce if this was contained within a valid tag"""
+        if self._discard_tag == '' and self._reproduce:
+            XMLGenerator.characters(self, content)
 
 class CPEDictParser(ContentHandler):
     """SAX content handler to load entries from the XML dictionary"""
