@@ -48,8 +48,7 @@ class Tool:
         raise NotImplementedError('Abstract method subclasses must implement')
 
 class UpdateDB(Tool):
-    """
-    """
+    """download and install the latest version of the selected database(s)"""
     str_id = 'update'
 
     def start(self, args):
@@ -68,7 +67,8 @@ Usage: labctl %s <db>
 Download and extract the given database(s)""" % (err, cls.str_id)
 
 class StatsDB(Tool):
-    """
+    """count the number of entries and different vendors for the selected
+    database(s)
     """
     str_id = 'stats'
 
@@ -89,7 +89,8 @@ Usage: labctl %s <db>
 Display statistics about the given database(s)""" % (err, cls.str_id)
 
 class SearchDB(Tool):
-    """
+    """load the selected database(s) and look for a given pattern in the
+    entries
     """
     str_id = 'search'
 
