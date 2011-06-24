@@ -81,6 +81,7 @@ class Database:
         resp = urllib2.urlopen(self.remote)
 
         fout = open(dest, 'w')
+        print '[+] Shrinking base...'
         self._storage_filter(resp, fout)
 
         fout.close()
