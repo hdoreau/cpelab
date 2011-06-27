@@ -40,7 +40,7 @@ class NmapOS(Database):
         Database.__init__(self)
         self._item_title = None
 
-    def load(self):
+    def _load_specific(self):
         """load entries from local file"""
         fin = open(NmapOS.local_filename())
         try:

@@ -40,7 +40,7 @@ class CPEDict(Database):
     local = 'cpe_dict.xml'
     str_id = 'cpe-dict'
 
-    def load(self):
+    def _load_specific(self):
         """load entries from the filesystem"""
         handler = CPEDictParser(self)
         xml.sax.parse(CPEDict.local_filename(), handler)

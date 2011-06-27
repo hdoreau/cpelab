@@ -42,7 +42,12 @@ class Database:
         self.entries = []
 
     def load(self):
-        """load DB information from the filesystem"""
+        """load DB information from the filesystem if not done yet"""
+        if not self.loaded:
+            self._load_specific()
+
+    def _load_specific(self):
+        """actually load DB information"""
         raise NotImplementedError('Abstract method subclasses must implement')
 
     def display_info(self):
