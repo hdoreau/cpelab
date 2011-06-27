@@ -136,7 +136,7 @@ class CPEItem(DBEntry):
         self.fields['title'] = title
         self.fields['name'] = name
 
-        name = name.replace('cpe:/', '')
+        name = name[5::]
         items = name.split(':')
         while len(items) < 7:
             items.append('')
