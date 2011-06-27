@@ -25,6 +25,8 @@
 
 """Base classes for processing modules"""
 
+import re
+
 from cpelab.databases.utils import db_iter
 
 
@@ -104,13 +106,21 @@ class SearchDB(Tool):
 
         for db_ref in db_iter(db_spec):
             db_ref.load()
-            res = db_ref.lookup(pattern)
+            res = self._lookup(db_ref, pattern)
             if len(res) == 0:
                 print '%s: nothing found' % db_ref.str_id
             else:
                 print '%s:' % db_ref.str_id
                 for match in res:
                     print '%s' % str(match)
+
+    def _lookup(self, db, pattern):
+        """look for a given pattern within the loaded entries"""
+        res = []
+        for entry in db.entries:
+            if re.search(pattern, str(entry)) is not None:
+                res.append(entry)
+        return res
 
     @classmethod
     def help_msg(cls, err=''):

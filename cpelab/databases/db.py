@@ -26,7 +26,6 @@
 """base cpelab databases manipulation module"""
 
 import os
-import re
 import urllib2
 
 
@@ -60,16 +59,6 @@ class Database:
             vendors.add(cpe.fields['vendor'])
 
         print '\t%d vendors' % len(vendors)
-
-    def lookup(self, pattern):
-        """look for a given pattern within the loaded entries"""
-        res = []
-        for entry in self.entries:
-            for element in entry.fields.itervalues():
-                if re.search(pattern, element) is not None:
-                    res.append(entry)
-                    break
-        return res
 
     def create_or_update(self):
         """download latest version of the database from a remote location and
