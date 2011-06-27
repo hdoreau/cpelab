@@ -45,6 +45,7 @@ class Database:
         """load DB information from the filesystem if not done yet"""
         if not self.loaded:
             self._load_specific()
+            self.loaded = True
 
     def _load_specific(self):
         """actually load DB information"""

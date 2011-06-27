@@ -44,7 +44,6 @@ class CPEDict(Database):
         """load entries from the filesystem"""
         handler = CPEDictParser(self)
         xml.sax.parse(CPEDict.local_filename(), handler)
-        self.loaded = True
 
     def _storage_filter(self, fin, fout):
         """

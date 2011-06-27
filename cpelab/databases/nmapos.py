@@ -49,8 +49,6 @@ class NmapOS(Database):
         finally:
             fin.close()
 
-        self.loaded = True
-
     def _process_line(self, line):
         """process a single line of the nmap OS database"""
         if line.startswith('Fingerprint'):
