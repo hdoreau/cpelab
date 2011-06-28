@@ -77,8 +77,8 @@ class NmapOSItem(DBEntry):
         DBEntry.__init__(self)
         self.fields['title'] = items[0]
         self.fields['vendor'] = items[1]
-        self.fields['family'] = items[2]
-        self.fields['generation'] = items[3]
+        self.fields['product'] = items[2]
+        self.fields['version'] = items[3]
         self.fields['devtype'] = items[4]
 
     def __str__(self):
