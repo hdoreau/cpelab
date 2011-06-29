@@ -51,21 +51,6 @@ class Database:
         """actually load DB information"""
         raise NotImplementedError('Abstract method subclasses must implement')
 
-    def display_info(self):
-        """print statistics and factoids about the DB"""
-        if not self.loaded:
-            print '%s: not loaded' % self.str_id
-            return
-
-        print '%s:' % self.str_id
-        print '\t%d entries loaded' % len(self.entries)
-
-        vendors = set()
-        for cpe in self.entries:
-            vendors.add(cpe.fields['vendor'])
-
-        print '\t%d vendors' % len(vendors)
-
     def create_or_update(self):
         """download latest version of the database from a remote location and
         store it locally
