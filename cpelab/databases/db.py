@@ -47,10 +47,6 @@ class Database:
             self._load_specific()
             self.loaded = True
 
-    def _load_specific(self):
-        """actually load DB information"""
-        raise NotImplementedError('Abstract method subclasses must implement')
-
     def create_or_update(self):
         """download latest version of the database from a remote location and
         store it locally
@@ -66,6 +62,10 @@ class Database:
 
         fout.close()
         print '[+] OK (see %s)' % dest
+
+    def _load_specific(self):
+        """actually load DB information"""
+        raise NotImplementedError('Abstract method subclasses must implement')
 
     def _storage_filter(self, fin, fout):
         """
