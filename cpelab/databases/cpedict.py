@@ -33,17 +33,17 @@ from xml.sax.saxutils import XMLGenerator
 from cpelab.databases.db import Database, DBEntry
 
 
-class CPEDict(Database):
-    """CPE dictionnary"""
+class CPEDictOS(Database):
+    """CPE dictionnary subset: operating systems and hardware"""
 
     remote = 'http://static.nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.2.xml'
-    local = 'cpe_dict.xml'
-    str_id = 'cpe-dict'
+    local = 'cpe_dict_os.xml'
+    str_id = 'cpe-os'
 
     def _load_specific(self):
         """load entries from the filesystem"""
         handler = CPEDictParser(self)
-        xml.sax.parse(CPEDict.local_filename(), handler)
+        xml.sax.parse(CPEDictOS.local_filename(), handler)
 
     def _storage_filter(self, fin, fout):
         """
