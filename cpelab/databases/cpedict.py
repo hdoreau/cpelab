@@ -189,8 +189,8 @@ class CPEItem(DBEntry):
         """instanciate a new entry"""
         DBEntry.__init__(self)
 
-        self.fields['title'] = title
-        self.fields['name'] = name
+        self.fields['title'] = title.lower()
+        self.fields['name'] = name.lower()
 
         name = name[5::]
         items = name.split(':')
@@ -207,5 +207,8 @@ class CPEItem(DBEntry):
 
     def __str__(self):
         """return a human readable representation"""
-        return self.fields['name']
+        lines = []
+        for k in ['title', 'name']:
+            lines.append('%s => %s' % (k, self.fields[k]))
+        return '\n'.join(lines) + '\n'
 

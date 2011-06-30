@@ -77,8 +77,8 @@ class NmapOS(Database):
 
         elif line.startswith('Class'):
             fp_meta = line.replace('Class', '', 1)
-            fp_meta = [x.strip().lower() for x in fp_meta.split('|')]
-            fp_meta.insert(0, self._item_title.lower())
+            fp_meta = [x.strip() for x in fp_meta.split('|')]
+            fp_meta.insert(0, self._item_title)
             os_entry = NmapOSItem(fp_meta)
 
             self.entries.append(os_entry)
@@ -88,12 +88,13 @@ class NmapOSItem(DBEntry):
     def __init__(self, items):
         """instanciate a new entry"""
         DBEntry.__init__(self)
-        self.fields['title'] = items[0]
-        self.fields['vendor'] = items[1]
-        self.fields['product'] = items[2]
-        self.fields['version'] = items[3]
-        self.fields['devtype'] = items[4]
+        self.fields['title'] = items[0].lower()
+        self.fields['vendor'] = items[1].lower()
+        self.fields['product'] = items[2].lower()
+        self.fields['version'] = items[3].lower()
+        self.fields['devtype'] = items[4].lower()
 
     def __str__(self):
         """return a human readable representation"""
-        return ' '.join(self.fields.values())
+        lines = ['%s => %s' % (k, v) for k, v in self.fields.iteritems()]
+        return '\n'.join(lines) + '\n'
