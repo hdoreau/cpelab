@@ -25,14 +25,17 @@
 
 """Nmap OS database manipulation module"""
 
+import urllib2
+
 from cpelab.databases.db import Database, DBEntry
+
+
+NMAP_OS_DICT_LOCATION = 'http://nmap.org/svn/nmap-os-db'
 
 
 class NmapOS(Database):
     """Nmap OS fingerprints database"""
-    
-    remote = 'http://nmap.org/svn/nmap-os-db'
-    local = 'nmap-os-db'
+
     str_id = 'nmap-os'
 
     def __init__(self):
@@ -40,9 +43,26 @@ class NmapOS(Database):
         Database.__init__(self)
         self._item_title = None
 
+    def create_or_update(self):
+        """download latest version of the database from a remote location and
+        store it locally
+        """
+        dest = self.path
+
+        print '[+] Updating %s...' % str(NmapOS.str_id)
+        resp = urllib2.urlopen(NMAP_OS_DICT_LOCATION)
+
+        fout = open(dest, 'w')
+        print '[+] Shrinking base...'
+        for line in resp:
+            if line.startswith('Fingerprint') or line.startswith('Class'):
+                fout.write(line)
+        fout.close()
+        print '[+] OK (see %s)' % dest
+
     def _load_specific(self):
         """load entries from local file"""
-        fin = open(NmapOS.local_filename())
+        fin = open(self.path)
         try:
             for line in fin:
                 self._process_line(line)
@@ -62,13 +82,6 @@ class NmapOS(Database):
             os_entry = NmapOSItem(fp_meta)
 
             self.entries.append(os_entry)
-
-    def _storage_filter(self, fin, fout):
-        """
-        """
-        for line in fin:
-            if line.startswith('Fingerprint') or line.startswith('Class'):
-                fout.write(line)
 
 class NmapOSItem(DBEntry):
     """represent a single entry from the Nmap OS database"""

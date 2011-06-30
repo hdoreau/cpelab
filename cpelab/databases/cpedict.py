@@ -25,6 +25,8 @@
 
 """CPE dictionary manipulation module"""
 
+import urllib2
+import tempfile
 import xml.sax
 
 from xml.sax.handler import ContentHandler
@@ -33,38 +35,92 @@ from xml.sax.saxutils import XMLGenerator
 from cpelab.databases.db import Database, DBEntry
 
 
-class CPEDictOS(Database):
+CPE_DICT_LOCATION = 'http://static.nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.2.xml'
+
+class CachedDict:
+    """
+    """
+    is_cached = False
+    fcached = tempfile.TemporaryFile()
+
+    @classmethod
+    def get(cls):
+        """
+        """
+        if not cls.is_cached:
+            print '[+] Caching CPE dictionary'
+            resp = urllib2.urlopen(CPE_DICT_LOCATION)
+            cls.fcached.write(resp.read())
+            print '[+] OK'
+            cls.is_cached = True
+
+        cls.fcached.seek(0)
+        return cls.fcached
+
+class CPEOS(Database):
     """CPE dictionnary subset: operating systems and hardware"""
 
-    remote = 'http://static.nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.2.xml'
-    local = 'cpe_dict_os.xml'
     str_id = 'cpe-os'
+
+    def create_or_update(self):
+        """
+        """
+        dest = self.path
+
+        print '[+] Updating %s...' % str(CPEOS.str_id)
+        full_db = CachedDict.get()
+
+        fout = open(dest, 'w')
+        print '[+] Shrinking base...'
+        xml.sax.parse(full_db, CPEFilter(fout, 'oh'))
+
+        fout.close()
+        print '[+] OK (see %s)' % dest
 
     def _load_specific(self):
         """load entries from the filesystem"""
-        handler = CPEDictParser(self)
-        xml.sax.parse(CPEDictOS.local_filename(), handler)
+        xml.sax.parse(self.path, CPELoader(self))
 
-    def _storage_filter(self, fin, fout):
+class CPEApp(Database):
+    """CPE dictionnary subset: applications"""
+
+    str_id = 'cpe-app'
+
+    def create_or_update(self):
         """
         """
-        generator = DictOSFilter(fout)
-        xml.sax.parse(fin, generator)
+        dest = self.path
 
-class DictOSFilter(XMLGenerator):
+        print '[+] Updating %s...' % str(CPEApp.str_id)
+        full_db = CachedDict.get()
+
+        fout = open(dest, 'w')
+        print '[+] Shrinking base...'
+        xml.sax.parse(full_db, CPEFilter(fout, 'a'))
+
+        fout.close()
+        print '[+] OK (see %s)' % dest
+
+    def _load_specific(self):
+        """load entries from the filesystem"""
+        xml.sax.parse(self.path, CPELoader(self))
+
+class CPEFilter(XMLGenerator):
     """produce a reduced CPE dict with only non-deprecated OS related entries"""
-    def __init__(self, out):
+    def __init__(self, out, valid_parts):
         """instanciate a new filter"""
         XMLGenerator.__init__(self, out)
         self._reproduce = False
         self._discard_tag = ''
+        self._valid_parts = valid_parts
 
     def startElement(self, name, attrs):
         """callback: opening tag. Only keep OS related item, discard deprecated
         entries and non en-US titles.
         """
         if name == 'cpe-item' and not attrs.has_key('deprecated'):
-            if not attrs['name'].startswith('cpe:/a'):
+            # 5th char of a CPE name is the part (cpe:/a:...)
+            if attrs['name'][5] in self._valid_parts:
                 self._reproduce = True
                 attrs = {'name': attrs['name']} # discard all metadata
 
@@ -92,7 +148,7 @@ class DictOSFilter(XMLGenerator):
         if self._discard_tag == '' and self._reproduce:
             XMLGenerator.characters(self, content)
 
-class CPEDictParser(ContentHandler):
+class CPELoader(ContentHandler):
     """SAX content handler to load entries from the XML dictionary"""
     def __init__(self, cpedict):
         """

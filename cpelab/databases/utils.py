@@ -26,10 +26,12 @@
 """misc database utilities"""
 
 from cpelab.databases.nmapos import NmapOS
-from cpelab.databases.cpedict import CPEDictOS
+from cpelab.databases.cpedict import CPEOS, CPEApp
 
 # List of available databases
-DB_MAP = {NmapOS.str_id: NmapOS, CPEDictOS.str_id: CPEDictOS}
+DB_MAP = { NmapOS.str_id: NmapOS,
+           CPEOS.str_id: CPEOS,
+           CPEApp.str_id: CPEApp }
 
 
 def db_iter(db_spec):
