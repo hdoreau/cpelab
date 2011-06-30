@@ -31,6 +31,7 @@ import sys
 from cpelab.databases.utils import db_iter 
 from cpelab.tools.toolbase import RuntimeToolError, UpdateDB, StatsDB, SearchDB
 from cpelab.tools.comparison import VendorDiff, VendorCommon
+from cpelab.tools.translation import NmapOS2CPE
 
 
 # List of available processing modules
@@ -39,7 +40,8 @@ TOOLS_MAP = {
     StatsDB.str_id: StatsDB,
     SearchDB.str_id: SearchDB,
     VendorDiff.str_id: VendorDiff,
-    VendorCommon.str_id: VendorCommon
+    VendorCommon.str_id: VendorCommon,
+    NmapOS2CPE.str_id: NmapOS2CPE
 }
 
 
