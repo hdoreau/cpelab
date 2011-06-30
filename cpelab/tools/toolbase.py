@@ -114,7 +114,7 @@ class SearchDB(Tool):
 
         for db_ref in db_iter(db_spec):
             db_ref.load()
-            res = self._lookup(db_ref, pattern)
+            res = self.lookup(db_ref, pattern)
             if len(res) == 0:
                 print '%s: nothing found' % db_ref.str_id
             else:
@@ -122,7 +122,7 @@ class SearchDB(Tool):
                 for match in res:
                     print '%s' % str(match)
 
-    def _lookup(self, db, pattern):
+    def lookup(self, db, pattern):
         """look for a given pattern within the loaded entries"""
         res = []
         for entry in db.entries:
