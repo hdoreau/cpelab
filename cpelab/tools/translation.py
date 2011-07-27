@@ -107,7 +107,7 @@ class NmapOS2CPE(Tool):
         """return an arbitrary score (float) to express how similar are two
         entries
         """
-        distance = self._levenshtein(ref.fields['title'], candidate.fields['title']) 
+        distance = self._levenshtein(ref.fields['title'], candidate.fields['title'])
         if distance == 0:
             return 2.
         else:
