@@ -86,10 +86,14 @@ class StatsDB(Tool):
             print '\t%d entries loaded' % len(db_ref.entries)
 
             vendors = set()
+            products = set()
+
             for cpe in db_ref.entries:
                 vendors.add(cpe.fields['vendor'])
+                products.add(cpe.fields['product'])
 
             print '\t%d vendors' % len(vendors)
+            print '\t%d products' % len(products)
 
     @classmethod
     def help_msg(cls, err=''):
