@@ -34,16 +34,36 @@ DB_MAP = { NmapOS.str_id: NmapOS,
            CPEApp.str_id: CPEApp }
 
 
-def db_iter(db_spec):
-    """iterate over a selection of databases"""
-    if db_spec == 'all':
-        for val in DB_MAP.itervalues():
-            yield val()
-    else:
-        yield get_db(db_spec)
 
 def get_db(db_spec):
-    """get DB by name"""
+    """get a single DB by name"""
     if DB_MAP.has_key(db_spec):
         return DB_MAP[db_spec]()
+
+class DBSpecParser:
+    """
+    """
+    def __init__(self, pattern=None):
+        """initialize a new DBSpecParser instance"""
+        self._dbs = []
+        if pattern == 'all':
+            self._dbs = DB_MAP.values()
+        else:
+            for spec in pattern.split(' '):
+                if DB_MAP.has_key(spec):
+                    self._dbs.append(DB_MAP[spec])
+                else:
+                    raise DBSpecError('Invalid DB specification: %s' % pattern)
+
+    def __iter__(self):
+        """iterate through the selected databases"""
+        for val in self._dbs:
+            yield val()
+
+    def __str__(self):
+        """human readable representation of an instance"""
+        return ' '.join([str(x) for x in self._dbs])
+
+class DBSpecError(Exception):
+    """Error raised for invalid DB specification patterns"""
 

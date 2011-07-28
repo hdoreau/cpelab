@@ -28,7 +28,7 @@
 
 import sys
 
-from cpelab.databases.utils import db_iter 
+from cpelab.databases.utils import DBSpecParser, DBSpecError
 from cpelab.tools.toolbase import RuntimeToolError, UpdateDB, StatsDB, SearchDB
 from cpelab.tools.comparison import VendorDiff, VendorCommon
 from cpelab.tools.translation import NmapOS2CPE
@@ -86,7 +86,7 @@ class LabCLIError(Exception):
 
 def usage(reason=''):
     """print usage hint and exit"""
-    dblist = ' '.join([x.str_id for x in db_iter('all')])
+    dblist = ' '.join([x.str_id for x in DBSpecParser('all')])
     modlist = '\n  '.join(TOOLS_MAP.keys())
 
     sys.exit("""%s

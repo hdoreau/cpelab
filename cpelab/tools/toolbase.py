@@ -27,7 +27,7 @@
 
 import re
 
-from cpelab.databases.utils import db_iter
+from cpelab.databases.utils import DBSpecParser, DBSpecError
 
 
 class Tool:
@@ -55,11 +55,11 @@ class UpdateDB(Tool):
 
     def start(self, args):
         """update existing DB (or create them)"""
-        if len(args) != 1:
-            raise RuntimeToolError('Invalid command line')
-
-        for db_ref in db_iter(args[0]):
-            db_ref.create_or_update()
+        try:
+            for db_ref in DBSpecParser(' '.join(args)):
+                db_ref.create_or_update()
+        except DBSpecError, err:
+            raise RuntimeToolError('Invalid arguments (%s)' % str(err))
 
     @classmethod
     def help_msg(cls, err=''):
@@ -76,25 +76,26 @@ class StatsDB(Tool):
 
     def start(self, args):
         """compute and display statistics about existing databases"""
-        if len(args) != 1:
-            raise RuntimeToolError('Invalid command line')
+        try:
+            for db_ref in DBSpecParser(' '.join(args)):
+                db_ref.load()
 
-        for db_ref in db_iter(args[0]):
-            db_ref.load()
+                print '%s:' % db_ref.str_id
+                print '\t%d entries loaded' % len(db_ref.entries)
+
+                vendors = set()
+                products = set()
+
+                for cpe in db_ref.entries:
+                    vendors.add(cpe.fields['vendor'])
+                    products.add(cpe.fields['product'])
+
+                print '\t%d vendors' % len(vendors)
+                print '\t%d products' % len(products)
+
+        except DBSpecError, err:
+            raise RuntimeToolError('Invalid arguments (%s)' % str(err))
             
-            print '%s:' % db_ref.str_id
-            print '\t%d entries loaded' % len(db_ref.entries)
-
-            vendors = set()
-            products = set()
-
-            for cpe in db_ref.entries:
-                vendors.add(cpe.fields['vendor'])
-                products.add(cpe.fields['product'])
-
-            print '\t%d vendors' % len(vendors)
-            print '\t%d products' % len(products)
-
     @classmethod
     def help_msg(cls, err=''):
         """return help message for the stats command"""
@@ -114,17 +115,19 @@ class SearchDB(Tool):
             raise RuntimeToolError('Invalid command line')
 
         pattern = args[0]
-        db_spec = args[1]
 
-        for db_ref in db_iter(db_spec):
-            db_ref.load()
-            res = self.lookup(db_ref, pattern)
-            if len(res) == 0:
-                print '%s: nothing found' % db_ref.str_id
-            else:
-                print '%s:' % db_ref.str_id
-                for match in res:
-                    print '%s' % str(match)
+        try:
+            for db_ref in DBSpecParser(args[1]):
+                db_ref.load()
+                res = self.lookup(db_ref, pattern)
+                if len(res) == 0:
+                    print '%s: nothing found' % db_ref.str_id
+                else:
+                    print '%s:' % db_ref.str_id
+                    for match in res:
+                        print '%s' % str(match)
+        except DBSpecError, err:
+            raise RuntimeToolError('Invalid arguments (%s)' % str(err))
 
     def lookup(self, db, pattern):
         """look for a given pattern within the loaded entries"""
