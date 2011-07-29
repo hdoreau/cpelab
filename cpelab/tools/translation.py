@@ -80,3 +80,4 @@ Attempt to translate nmap signature into CPE.
 Available translators are:
   %s
 """ % (err, cls.str_id, '\n  '.join(cls._translators.keys()))
+
