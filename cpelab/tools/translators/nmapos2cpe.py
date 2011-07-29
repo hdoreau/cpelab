@@ -22,20 +22,19 @@
 # 02110-1301 USA.
 ##
 
-"""
-"""
+"""Implementations of translation algorithms"""
 
 from cpelab.tools.toolbase import SearchDB
 
 
 class SimpleTranslator:
-    """
+    """The most simple and naive translator. Compare fields and use translation
+    tables to match entries.
     """
     str_id = 'simple'
 
     def __init__(self, pattern, db0, db1):
-        """
-        """
+        """initialize a new simple translator"""
         raise NotImplementedError('Not implemented yet')
 
 class FuzzyTranslator:
