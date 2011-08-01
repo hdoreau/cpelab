@@ -209,6 +209,6 @@ class CPEItem(DBEntry):
         """return a human readable representation"""
         lines = []
         for k in ['title', 'name']:
-            lines.append('%s => %s' % (k, self.fields[k]))
+            lines.append('%s => %s' % (k.encode("utf-8"), self.fields[k].encode("utf-8")))
         return '\n'.join(lines) + '\n'
 
