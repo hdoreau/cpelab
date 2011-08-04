@@ -30,7 +30,6 @@ import tempfile
 import xml.sax
 
 from xml.sax.handler import ContentHandler
-from xml.sax.saxutils import XMLGenerator
 
 from cpelab.databases.db import Database, DBEntry
 
