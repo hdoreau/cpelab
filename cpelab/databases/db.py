@@ -100,17 +100,17 @@ class Database:
         # TODO make a light and efficient iterator
         items = []
         if strict:
-            cmp = '='
+            op = '='
         else:
-            cmp = 'like'
+            op = 'like'
         
-        filter = []
+        search_filter = []
         elems = []
         for k, v in spec.iteritems():
-            filter.append('%s %s ?' % (self.dbfield(k), cmp))
+            search_filter.append('%s %s ?' % (self.dbfield(k), op))
             elems.append(v)
-        filter = ' and '.join(filter)
-        query = 'select * from %s where (%s)' % (self.str_id, filter)
+        search_filter = ' and '.join(search_filter)
+        query = 'select * from %s where (%s)' % (self.str_id, search_filter)
         self.cursor.execute(query, tuple(elems))
         for res in self.cursor.fetchall():
             items.append(self._make_item(res))
