@@ -25,7 +25,7 @@
 
 """CPE dictionary manipulation module"""
 
-import urllib2
+import urllib
 import tempfile
 import xml.sax
 
@@ -36,27 +36,6 @@ from cpelab.databases.db import Database, DBEntry
 
 CPE_DICT_LOCATION = 'http://static.nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.2.xml'
 
-class CachedDict:
-    """This class allows to access the CPE dictionary several times without
-    having to download it every time.
-    """
-    is_cached = False
-    fcached = tempfile.TemporaryFile()
-
-    @classmethod
-    def get(cls):
-        """Download the dictionary if necessary and return a handle to the
-        beginning of the file.
-        """
-        if not cls.is_cached:
-            print '[+] Caching CPE dictionary'
-            resp = urllib2.urlopen(CPE_DICT_LOCATION)
-            cls.fcached.write(resp.read())
-            print '[+] OK'
-            cls.is_cached = True
-
-        cls.fcached.seek(0)
-        return cls.fcached
 
 class CPEOS(Database):
     """CPE dictionary subset: operating systems and hardware."""
@@ -84,7 +63,7 @@ class CPEOS(Database):
         print '[+] Updating %s...' % str(CPEOS.str_id)
 
         self.connect()
-        full_db = CachedDict.get()
+        full_db, _ = urllib.urlretrieve(CPE_DICT_LOCATION)
 
         print '[+] Storing base...'
 
@@ -101,31 +80,6 @@ class CPEOS(Database):
         # data[0] is the DB id, discard it
         item.update({'title': data[1], 'name': data[2]})
         return item
-
-
-#class CPEApp(Database):
-#    """CPE dictionary subset: applications"""
-#
-#    str_id = 'cpe-app'
-#
-#    def create_or_update(self):
-#        """
-#        """
-#        dest = self.path
-#
-#        print '[+] Updating %s...' % str(CPEApp.str_id)
-#        full_db = CachedDict.get()
-#
-#        fout = open(dest, 'w')
-#        print '[+] Shrinking base...'
-#        xml.sax.parse(full_db, CPEFilter(fout, 'a'))
-#
-#        fout.close()
-#        print '[+] OK (see %s)' % dest
-#
-#    def _load_specific(self):
-#        """load entries from the filesystem"""
-#        xml.sax.parse(self.path, CPELoader(self))
 
 class CPEFilter(ContentHandler):
     """Produce a reduced CPE dict with only non-deprecated OS related entries
