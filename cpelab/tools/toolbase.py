@@ -32,21 +32,17 @@ from cpelab.databases.utils import DBSpecParser, DBSpecError
 
 
 class Tool:
-    """abstract base class for processing modules."""
+    """Abstract base class for processing modules."""
     str_id = None
 
-    def __init__(self):
-        """instanciate new processing module"""
-        pass
-
     def start(self, args):
-        """module entry point"""
+        """Module entry point."""
         raise NotImplementedError('Abstract method subclasses must implement')
 
     @classmethod
     def help_msg(cls, err=''):
-        """class method to return the syntaxic help message for this specific
-        command
+        """Class method to return the syntaxic help message for this specific
+        command.
         """
         raise NotImplementedError('Abstract method subclasses must implement')
 
@@ -56,8 +52,7 @@ class InitDB(Tool):
     str_id = 'init'
 
     def start(self, args):
-        """
-        """
+        """Reset existing DB if exists and setup a new empty one."""
         print '[+] Initializing the whole database...'
         db = Database()
         db.connect()
@@ -67,17 +62,17 @@ class InitDB(Tool):
 
     @classmethod
     def help_msg(cls, err=''):
-        """return help message for the init command"""
+        """Return help message for the init command."""
         return """%s
 Usage: labctl %s
 Delete existing databases and recreate a new environment""" % (err, cls.str_id)
 
 class UpdateDB(Tool):
-    """download and install the latest version of the selected database(s)"""
+    """Download and install the latest version of the selected database(s)."""
     str_id = 'update'
 
     def start(self, args):
-        """update existing DB"""
+        """Update databse from fresh upstream sources."""
         try:
             for db_ref in DBSpecParser(' '.join(args)):
                 db_ref.populate()
@@ -86,19 +81,19 @@ class UpdateDB(Tool):
 
     @classmethod
     def help_msg(cls, err=''):
-        """return help message for the update command"""
+        """Return help message for the update command."""
         return """%s
 Usage: labctl %s <db>
 Download and extract the given database(s)""" % (err, cls.str_id)
 
 class StatsDB(Tool):
-    """count the number of entries and different vendors for the selected
-    database(s)
+    """Count the number of entries and different vendors for the selected
+    database(s).
     """
     str_id = 'stats'
 
     def start(self, args):
-        """compute and display statistics about existing databases"""
+        """Compute and display statistics about existing databases."""
         try:
             for db_ref in DBSpecParser(' '.join(args)):
                 db_ref.connect()
@@ -116,19 +111,17 @@ class StatsDB(Tool):
             
     @classmethod
     def help_msg(cls, err=''):
-        """return help message for the stats command"""
+        """Return help message for the stats command."""
         return """%s
 Usage: labctl %s <db>
 Display statistics about the given database(s)""" % (err, cls.str_id)
 
 class SearchDB(Tool):
-    """load the selected database(s) and look for a given pattern in the
-    entries
-    """
+    """Search for a given pattern in the entries."""
     str_id = 'search'
 
     def start(self, args):
-        """look for a given pattern in the selected database"""
+        """Look for a given pattern in the selected table(s)."""
         if len(args) != 2:
             raise RuntimeToolError('Invalid command line')
 
@@ -151,11 +144,11 @@ class SearchDB(Tool):
 
     @classmethod
     def help_msg(cls, err=''):
-        """return help message for the search command"""
+        """Return help message for the search command."""
         return """%s
 Usage: labctl %s <pattern> <db>
 Look for a pattern in the given database(s)""" % (err, cls.str_id)
 
 class RuntimeToolError(Exception):
-    """base error for unexpected conditions while running tools"""
+    """Base error for unexpected conditions while running tools."""
 

@@ -22,7 +22,7 @@
 # 02110-1301 USA.
 ##
 
-"""main interface to control the CPE lab."""
+"""Main interface to control the CPE lab."""
 
 from cpelab.cli import main
 

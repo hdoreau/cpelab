@@ -38,14 +38,16 @@ from cpelab.databases.db import Database, DBEntry
 CPE_DICT_LOCATION = 'http://static.nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.2.xml'
 
 class CachedDict:
-    """
+    """This class allows to access the CPE dictionary several times without
+    having to download it every time.
     """
     is_cached = False
     fcached = tempfile.TemporaryFile()
 
     @classmethod
     def get(cls):
-        """
+        """Download the dictionary if necessary and return a handle to the
+        beginning of the file.
         """
         if not cls.is_cached:
             print '[+] Caching CPE dictionary'
@@ -58,8 +60,7 @@ class CachedDict:
         return cls.fcached
 
 class CPEOS(Database):
-    """CPE dictionary subset: operating systems and hardware"""
-
+    """CPE dictionary subset: operating systems and hardware."""
     str_id = 'cpeos'
 
     def __init__(self):
@@ -80,8 +81,7 @@ class CPEOS(Database):
         self._search_fields = ['cpe_title', 'cpe_name']
 
     def populate(self):
-        """
-        """
+        """Load items into the corresponding table of the database."""
         print '[+] Updating %s...' % str(CPEOS.str_id)
 
         self.connect()
@@ -97,8 +97,7 @@ class CPEOS(Database):
         print '[+] Update complete!'
 
     def _make_item(self, data):
-        """
-        """
+        """Make and return an item (object) from selected fields from the database."""
         item = CPEItem()
         # data[0] is the DB id, discard it
         item.update({'title': data[1], 'name': data[2]})
@@ -130,9 +129,10 @@ class CPEOS(Database):
 #        xml.sax.parse(self.path, CPELoader(self))
 
 class CPEFilter(ContentHandler):
-    """produce a reduced CPE dict with only non-deprecated OS related entries"""
+    """Produce a reduced CPE dict with only non-deprecated OS related entries
+    and store the valid entries into the database."""
     def __init__(self, db, valid_parts):
-        """instanciate a new filter"""
+        """Initialize a new CPEFilter instance."""
         ContentHandler.__init__(self)
         self.db = db
         self._tmp_item = None
@@ -145,8 +145,8 @@ class CPEFilter(ContentHandler):
         self._curr_title = []
 
     def startElement(self, name, attrs):
-        """callback: opening tag. Only keep OS related item, discard deprecated
-        entries and non en-US titles.
+        """Callback: opening XML tag. Only keep OS related item, discard
+        deprecated entries and non en-US titles.
         """
         if self._discard:
             return
@@ -166,7 +166,7 @@ class CPEFilter(ContentHandler):
             self._in_title = True
 
     def endElement(self, name):
-        """callback: ending tag. Reproduce if this was a valid one"""
+        """Callback: ending XML tag"""
         if name == 'cpe-item':
             if self._tmp_item is not None:
                 self._tmp_item.save(self.db)
@@ -179,15 +179,14 @@ class CPEFilter(ContentHandler):
                 self._in_title = False
 
     def characters(self, content):
-        """callback: text. reproduce if this was contained within a valid tag"""
+        """Callback: text."""
         if self._in_title:
             self._curr_title.append(content)
 
 class CPEItem(DBEntry):
-    """represent a single entry from the CPE dictionary"""
-
+    """Represent a single entry from the CPE dictionary."""
     def update(self, components):
-        """Update an existing instance"""
+        """Update an existing instance."""
         if components.has_key('title'):
             self.fields['title'] = components['title'].lower()
         if components.has_key('name'):
@@ -208,8 +207,7 @@ class CPEItem(DBEntry):
             self.fields['language'] = items[6]
 
     def save(self, db):
-        """
-        """
+        """Store a new item into the database."""
         fields = ['title', 'name', 'part', 'vendor', 'product', 'version',
             'update', 'edition', 'language']
 
@@ -219,7 +217,7 @@ class CPEItem(DBEntry):
         db.cursor.execute('INSERT INTO %s (%s) VALUES (?,?,?,?,?,?,?,?,?)' % (db.str_id, fdesc), t)
 
     def __str__(self):
-        """return a human readable representation"""
+        """Return a human readable representation."""
         lines = []
         for k in ['title', 'name']:
             lines.append('%s => %s' % (k.encode("utf-8"), self.fields[k].encode("utf-8")))

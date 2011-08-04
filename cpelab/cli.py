@@ -48,11 +48,11 @@ TOOLS_MAP = {
 
 
 class LabCLI:
-    """this class implements cpelab base methods for interaction with the
+    """This class implements cpelab base methods for interaction with the
     supported databases.
     """
     def __init__(self, args=sys.argv):
-        """instanciate a new CLI"""
+        """Initialize a new CLI instance."""
         self._args = args
         try:
             self.run_cmd()
@@ -60,7 +60,7 @@ class LabCLI:
             raise LabCLIError('Invalid command line: missing arguments')
 
     def run_cmd(self):
-        """quickly parse command line and execute desired actions"""
+        """Quickly parse command line and execute desired actions."""
         cmd = self._args[1]
 
         if cmd == 'help':
@@ -77,24 +77,24 @@ class LabCLI:
             sys.exit(tool.help_msg(err=str(err)))
 
     def _cmd_help(self, modname):
-        """display help for a specific external processing module"""
+        """Display help for a specific external processing module."""
         if TOOLS_MAP.has_key(modname):
             return TOOLS_MAP[modname].help_msg()
         raise LabCLIError('Unknown command: %s' % modname)
 
 class LabCLIError(Exception):
-    """base exception raised on CLI execution errors"""
+    """Base exception raised on CLI execution errors."""
 
 
 def usage(reason=''):
-    """print usage hint and exit"""
+    """Print usage hint and exit."""
     dblist = ' '.join([x.str_id for x in DBSpecParser('all')])
     modlist = '\n  '.join(TOOLS_MAP.keys())
 
     sys.exit("""%s
 Usage: cpelab <cmd> [parameters...]
 commands:
-  help <modname>  Display help for a given command
+  help <cmd>  Display help for a given command
 
   %s
 

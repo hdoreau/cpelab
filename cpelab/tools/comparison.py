@@ -34,8 +34,8 @@ class BaseComparator(Tool):
     """Base abstract class to implement 2 db comparison tools"""
 
     def start(self, args):
-        """tool entry point. targets is a list of (two) db instances to
-        compare
+        """Tool entry point. targets is a list of (two) db instances to
+        compare.
         """
         if len(args) != 2:
             raise RuntimeToolError('Invalid arguments')
@@ -57,18 +57,20 @@ class BaseComparator(Tool):
         db1.close()
 
     def _compare(self, db0, db1):
-        """comparison function. Compute and display resutls"""
+        """Comparison function. Compute and display results."""
         raise NotImplementedError('Abstract method subclasses must implement')
 
 class VendorDiff(BaseComparator):
-    """this tool performs a diff between vendors contained in two given
-    databases. The result is displayed in a "diff-like" fashion. See the
-    _compute_diff docstring for more information
+    """Diff vendors.
+    
+    This tool performs a diff between vendors contained in two given tables. The
+    result is displayed in a "unified diff-like" fashion. See the _compare
+    docstring for more information.
     """
     str_id = 'vendor-diff'
 
     def __init__(self):
-        """instanciate a new VendorDiff tool"""
+        """Initialize a new VendorDiff instance."""
         BaseComparator.__init__(self)
         self._diff_vendors = {}
 
@@ -85,24 +87,23 @@ class VendorDiff(BaseComparator):
             print '-%s' % vendor[0]
 
     def _do_query(self, db0, db1):
-        """
-        """
+        """Look for items that are exclusively present in db0."""
         db0.cursor.execute('select distinct %(db0)s.%(f0)s from %(db0)s where not exists (select id from %(db1)s where %(db1)s.%(f1)s = %(db0)s.%(f0)s)' \
             % {'db0': db0.str_id, 'db1': db1.str_id, 'f0': db0.dbfield('vendor'), 'f1': db1.dbfield('vendor')})
 
     @classmethod
     def help_msg(cls, err=''):
-        """return help message for the vendor-diff command"""
+        """Return help message for the vendor-diff command."""
         return """%s
 Usage: labctl %s <db0> <db1>
 Compares vendor entries between two databases.""" % (err, VendorDiff.str_id)
 
 class VendorCommon(BaseComparator):
-    """this tool looks for common vendors between two databases"""
+    """This tool looks for common vendors between two databases."""
     str_id = 'vendor-common'
 
     def _compare(self, db0, db1):
-        """display vendors found in both databases"""
+        """Display vendors found in both databases."""
         # select distinct nmapos.n_vendor from nmapos where exists (select id from cpeos where cpe_vendor = nmapos.n_vendor)
         db0.cursor.execute('select distinct %(f0)s from %(db0)s where exists (select id from %(db1)s where %(f1)s = %(db0)s.%(f0)s)' \
             % {'db0': db0.str_id, 'db1': db1.str_id, 'f0':db0.dbfield('vendor'), 'f1':db1.dbfield('vendor')})
@@ -112,7 +113,7 @@ class VendorCommon(BaseComparator):
 
     @classmethod
     def help_msg(cls, err=''):
-        """return help message for the vendor-diff command"""
+        """Return help message for the vendor-diff command."""
         return """%s
 Usage: labctl %s <db0> <db1>
 Display vendors found in both databases.""" % (err, VendorDiff.str_id)

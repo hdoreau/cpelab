@@ -35,12 +35,13 @@ DB_MAP = { NmapOS.str_id: NmapOS,
 
 
 def get_db(db_spec):
-    """get a single DB by name"""
+    """Get a single DB by name."""
     if DB_MAP.has_key(db_spec):
         return DB_MAP[db_spec]()
 
 class DBSpecParser:
-    """
+    """Analyze a database specification pattern and provide accessors to the
+    corresponding instances.
     """
     def __init__(self, pattern=None):
         """initialize a new DBSpecParser instance"""
@@ -55,12 +56,12 @@ class DBSpecParser:
                     raise DBSpecError('Invalid DB specification: %s' % pattern)
 
     def __iter__(self):
-        """iterate through the selected databases"""
+        """Iterate through the selected databases."""
         for val in self._dbs:
             yield val()
 
     def __str__(self):
-        """human readable representation of an instance"""
+        """Human readable representation of an instance."""
         return ' '.join([str(x) for x in self._dbs])
 
 class DBSpecError(Exception):

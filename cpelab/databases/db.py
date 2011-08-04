@@ -23,7 +23,7 @@
 ##
 
 
-"""base cpelab databases manipulation module"""
+"""Base cpelab databases manipulation module"""
 
 import os
 import sqlite3
@@ -34,12 +34,12 @@ SQLITE_INIT_SCRIPT = 'cpelab_init.sql'
 
 
 class Database:
-    """Base (abstract) class for DB. Define a common interface for subclasses"""
+    """Base (abstract) class for DB. Define a common interface for subclasses."""
 
     str_id = None
 
     def __init__(self):
-        """Initialize a new DB"""
+        """Initialize a new DB."""
         self.path = os.path.join(os.getcwd(), DATADIR, SQLITE_DB_FILE)
         self.conn = None
         self.cursor = None
@@ -47,12 +47,12 @@ class Database:
         self._search_fields = []
 
     def connect(self):
-        """Open connection to the database"""
+        """Open connection to the database."""
         self.conn = sqlite3.connect(self.path)
         self.cursor = self.conn.cursor()
 
     def close(self):
-        """Release connections to the database"""
+        """Release connections to the database."""
         if self.cursor is None or self.conn is None:
             raise DBError('Invalid close!')
 
@@ -64,14 +64,15 @@ class Database:
 
     def initialize(self):
         """Call the DB initialization script. Delete everything and re-create
-        empty tables"""
+        empty tables."""
         initfile = os.path.join(os.getcwd(), DATADIR, SQLITE_INIT_SCRIPT)
         fin = open(initfile)
         self.cursor.executescript(fin.read())
         fin.close()
 
     def count(self, field=None):
-        """
+        """Count the number of items or distinct entries for a given field if
+        supplied.
         """
         if field is None:
             # default: count the number of items
@@ -84,7 +85,17 @@ class Database:
             return self.cursor.fetchone()[0]
 
     def lookup(self, spec, strict=True):
-        """
+        """Perform lookup queries on the database.
+
+        spec is a dict, which keys are non db-specific fields (like 'vendor', or
+        'product'), on which you want to filter, and values are the pattern that
+        you want to apply on each field.
+
+        eg;
+        spec = {'vendor': 'openbsd', 'product': 'openbsd', 'version': '4.7'}
+
+        The strict arguments allows you to choose between a strict matching mode
+        ('field = value') or a more flexible one ('field like pattern').
         """
         # TODO make a light and efficient iterator
         items = []
@@ -106,7 +117,8 @@ class Database:
         return items
 
     def lookup_all(self, pattern):
-        """
+        """Provided for conveniency, look for pattern on all the search-relevant
+        fields of a database.
         """
         items = []
         for field in self._search_fields:
@@ -114,13 +126,13 @@ class Database:
         return items
 
     def dbfield(self, field):
-        """
+        """Get the internal name of a field from its application wide
+        exrpession.
         """
         return self.fields_map[field]
 
     def _make_item(self):
-        """
-        """
+        """Return an item (object) created from database information."""
         raise NotImplementedError('Abstract method subclasses must implement!')
 
 class DBEntry:
@@ -130,8 +142,7 @@ class DBEntry:
         self.fields = {}
 
     def save(self, db):
-        """
-        """
+        """Store a new item into the database."""
         raise NotImplementedError('Abstract method subclasses must implement')
 
 class DBError(Exception):

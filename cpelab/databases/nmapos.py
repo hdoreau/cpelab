@@ -34,12 +34,12 @@ NMAP_OS_DICT_LOCATION = 'http://nmap.org/svn/nmap-os-db'
 
 
 class NmapOS(Database):
-    """Nmap OS fingerprints database"""
+    """Nmap OS fingerprints database."""
 
     str_id = 'nmapos'
 
     def __init__(self):
-        """instanciate a new Nmap OS DB"""
+        """Initialize a new Nmap OS DB instance"""
         Database.__init__(self)
         self._item_title = None
         self.fields_map = {
@@ -52,8 +52,8 @@ class NmapOS(Database):
         self._search_fields = ['n_title']
 
     def populate(self):
-        """download latest version of the database from a remote location and
-        store it locally
+        """Download latest version of the database from a remote location and
+        store it locally.
         """
         print '[+] Updating %s...' % str(NmapOS.str_id)
 
@@ -78,8 +78,7 @@ class NmapOS(Database):
         print '[+] Update complete!'
 
     def _make_item(self, data):
-        """
-        """
+        """Create and return an item (object) from database information."""
         item = NmapOSItem()
         # data[0] is the DB id, discard it
         item.fields['title'] = data[1]
@@ -91,10 +90,10 @@ class NmapOS(Database):
         return item
 
 class NmapOSItem(DBEntry):
-    """Represent a single entry from the Nmap OS database"""
+    """Represent a single entry from the Nmap OS database."""
 
     def update(self, line):
-        """Process a single line of the nmap OS database"""
+        """Process a single line of the nmap OS database."""
         if line.startswith('Fingerprint'):
             line = line.replace('Fingerprint', '', 1)
             self.fields['title'] = line.strip().lower()
@@ -107,8 +106,7 @@ class NmapOSItem(DBEntry):
             self.fields['devtype'] = items[3]
 
     def save(self, db):
-        """
-        """
+        """Store a new item into the database."""
         t = (self.fields['title'],
              self.fields['vendor'],
              self.fields['product'],
@@ -120,7 +118,7 @@ class NmapOSItem(DBEntry):
             ' VALUES (?,?,?,?,?)' % db.str_id, t)
 
     def __str__(self):
-        """Return a human readable representation"""
+        """Return a human readable representation."""
         lines = ['%s => %s' % (k, v) for k, v in self.fields.iteritems()]
         return '\n'.join(lines) + '\n'
 

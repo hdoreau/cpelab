@@ -35,7 +35,7 @@ from cpelab.tools.translators.nmapos2cpe import SimpleTranslator, FuzzyTranslato
 
 
 class NmapOS2CPE(Tool):
-    """this tool attempts to translate nmap os fingerprints into CPE"""
+    """This tool attempts to translate nmap os fingerprints into CPE."""
     str_id = 'nmapos2cpe'
 
     _translators = {
@@ -45,9 +45,8 @@ class NmapOS2CPE(Tool):
     _default_translator = SimpleTranslator.str_id
 
     def start(self, args):
-        """tool entry point. targets is the list of arguments. It is expected to
-        contains the title of the fingerprint to translate, the nmap-db to use
-        and the cpe dictionary to use
+        """Tool entry point. The only expected argument is a filter (expressed
+        as a pattern) to select some entries from the nmap (source) database.
         """
         if len(args) < 1:
             raise RuntimeToolError('Invalid arguments')
@@ -75,7 +74,7 @@ class NmapOS2CPE(Tool):
 
     @classmethod
     def help_msg(cls, err=''):
-        """return help message for the translate command"""
+        """Return help message for the translate command."""
         return """%s
 Usage: labctl %s <signature title> [translator]
 Attempt to translate nmap signature into CPE.

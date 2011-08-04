@@ -28,17 +28,19 @@
 class SimpleTranslator:
     """The most simple and naive translator. Compare fields and use translation
     tables to match entries.
+
+    XXX This translator is a stub and does absolutely nothing yet!#
+
     """
     str_id = 'simple'
 
     def __init__(self, pattern, db0, db1):
-        """initialize a new simple translator"""
+        """Initialize a new simple translator"""
         self._create_vendor_table(db0)
         self._create_product_table(db0)
 
     def _create_vendor_table(self, nmap_db):
-        """
-        """
+        """Create a map of all the vendors present in the nmap database."""
         self._vendors = {}
         for item in nmap_db:
             self._vendors[item.fields['vendor']] = []
@@ -54,7 +56,7 @@ class FuzzyTranslator:
     str_id = 'fuzzy'
 
     def __init__(self, pattern, db0, db1):
-        """attempt to map entries from db0 that match pattern to corresponding
+        """Attempt to map entries from db0 that match pattern to corresponding
         entries from db1.
         """
         print '[+] Attempting to convert entries matching: %s' % pattern
@@ -82,7 +84,7 @@ class FuzzyTranslator:
                 print '\n'.join([x.fields['name'] for x in best_res])
 
     def _candidates(self, ref_entry, db):
-        """returned a reduced set, with the best candidates for matching"""
+        """Return a reduced set, with the best candidates for matching-"""
         spec = {
             db.dbfield('vendor'): ref_entry.fields['vendor'],
             db.dbfield('product'): ref_entry.fields['product'],
@@ -108,14 +110,14 @@ class FuzzyTranslator:
         return []
 
     def _matching_score(self, ref, candidate):
-        """return an arbitrary score (float) to express how similar are two
-        entries
+        """Return an arbitrary score (float) to express how similar are two
+        entries.
         """
         distance = self._levenshtein(ref.fields['title'], candidate.fields['title'])
         return 2. - distance
 
     def _levenshtein(self, str0, str1):
-        """calculate and return the Levenshtein distance between two strings"""
+        """Calculate and return the Levenshtein distance between two strings."""
         n, m = len(str0), len(str1)
         if n > m:
             str0, str1 = str1, str0
