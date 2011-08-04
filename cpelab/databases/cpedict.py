@@ -78,7 +78,7 @@ class CPEOS(Database):
             'edition': 'cpe_edition',
             'language': 'cpe_language'
         }
-        self._search_fields = ['cpe_title', 'cpe_name']
+        self._search_fields = ['title', 'name']
 
     def populate(self):
         """Load items into the corresponding table of the database."""

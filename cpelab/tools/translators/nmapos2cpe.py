@@ -86,9 +86,9 @@ class FuzzyTranslator:
     def _candidates(self, ref_entry, db):
         """Return a reduced set, with the best candidates for matching-"""
         spec = {
-            db.dbfield('vendor'): ref_entry.fields['vendor'],
-            db.dbfield('product'): ref_entry.fields['product'],
-            db.dbfield('version'): ref_entry.fields['version']
+            'vendor': ref_entry.fields['vendor'],
+            'product': ref_entry.fields['product'],
+            'version': ref_entry.fields['version']
         }
         # look for entries matching vendor, product and version
         candidates = db.lookup(spec)
@@ -96,13 +96,13 @@ class FuzzyTranslator:
             return candidates
 
         # no match: don't filter on version anymore
-        del spec[db.dbfield('version')]
+        del spec['version']
         candidates = db.lookup(spec)
         if len(candidates) > 0:
             return candidates
 
         # no match: don't filter on product anymore
-        del spec[db.dbfield('product')]
+        del spec['product']
         candidates = db.lookup(spec)
         if len(candidates) > 0:
             return candidates

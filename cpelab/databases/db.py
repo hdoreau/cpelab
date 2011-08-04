@@ -107,7 +107,7 @@ class Database:
         filter = []
         elems = []
         for k, v in spec.iteritems():
-            filter.append('%s %s ?' % (k, cmp))
+            filter.append('%s %s ?' % (self.dbfield(k), cmp))
             elems.append(v)
         filter = ' and '.join(filter)
         query = 'select * from %s where (%s)' % (self.str_id, filter)

@@ -49,7 +49,7 @@ class NmapOS(Database):
             'version': 'n_version',
             'devtype': 'n_devtype'
         }
-        self._search_fields = ['n_title']
+        self._search_fields = ['title']
 
     def populate(self):
         """Download latest version of the database from a remote location and
