@@ -131,7 +131,7 @@ class Database:
         """
         return self.fields_map[field]
 
-    def _make_item(self):
+    def _make_item(self, data):
         """Return an item (object) created from database information."""
         raise NotImplementedError('Abstract method subclasses must implement!')
 
