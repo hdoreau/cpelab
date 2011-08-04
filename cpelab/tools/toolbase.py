@@ -141,9 +141,10 @@ class SearchDB(Tool):
                 if len(res) == 0:
                     print '%s: nothing found' % db_ref.str_id
                 else:
-                    print '%s:' % db_ref.str_id
+                    print '[Matching items in %s]' % db_ref.str_id
                     for match in res:
                         print '%s' % str(match)
+                    print "%d matching items in %s" % (len(res), db_ref.str_id)
                 db_ref.close()
         except DBSpecError, err:
             raise RuntimeToolError('Invalid arguments (%s)' % str(err))
