@@ -31,30 +31,27 @@ from cpelab.databases.nmapos import NmapOS
 from cpelab.databases.cpedict import CPEOS
 
 
-class SimpleTranslator:
-    """The most simple and naive translator. Compare fields and use translation
-    tables to match entries.
-
-    XXX This translator is a stub and does absolutely nothing yet!#
-
-    """
-    str_id = 'simple'
-
-    def __init__(self, pattern, db0, db1):
-        """Initialize a new simple translator"""
-        self._create_vendor_table(db0)
-        self._create_product_table(db0)
-
-    def _create_vendor_table(self, nmap_db):
-        """Create a map of all the vendors present in the nmap database."""
-        self._vendors = {}
-        for item in nmap_db:
-            self._vendors[item.fields['vendor']] = []
-
-    def _create_products_table(self):
-        """
-        """
-        pass
+#class SimpleTranslator:
+#    """The most simple and naive translator. Compare fields and use translation
+#    tables to match entries.
+#    """
+#    str_id = 'simple'
+#
+#    def __init__(self, pattern, db0, db1):
+#        """Initialize a new simple translator"""
+#        self._create_vendor_table(db0)
+#        self._create_product_table(db0)
+#
+#    def _create_vendor_table(self, nmap_db):
+#        """Create a map of all the vendors present in the nmap database."""
+#        self._vendors = {}
+#        for item in nmap_db:
+#            self._vendors[item.fields['vendor']] = []
+#
+#    def _create_products_table(self):
+#        """
+#        """
+#        pass
 
 class FuzzyTranslator:
     """
@@ -145,10 +142,10 @@ class NmapOS2CPE(Tool):
     str_id = 'nmapos2cpe'
 
     _translators = {
-        SimpleTranslator.str_id: SimpleTranslator,
+        #SimpleTranslator.str_id: SimpleTranslator,
         FuzzyTranslator.str_id: FuzzyTranslator
     }
-    _default_translator = SimpleTranslator.str_id
+    _default_translator = FuzzyTranslator.str_id
 
     def start(self, args):
         """Tool entry point. The only expected argument is a filter (expressed
