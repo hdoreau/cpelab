@@ -36,65 +36,91 @@ NMAP_OS_DICT_LOCATION = 'http://nmap.org/svn/nmap-os-db'
 class NmapOS(Database):
     """Nmap OS fingerprints database"""
 
-    str_id = 'nmap-os'
+    str_id = 'nmapos'
 
     def __init__(self):
         """instanciate a new Nmap OS DB"""
         Database.__init__(self)
         self._item_title = None
+        self.fields_map = {
+            'title': 'n_title',
+            'vendor': 'n_vendor',
+            'product': 'n_product',
+            'version': 'n_version',
+            'devtype': 'n_devtype'
+        }
+        self._search_fields = ['n_title']
 
-    def create_or_update(self):
+    def populate(self):
         """download latest version of the database from a remote location and
         store it locally
         """
-        dest = self.path
-
         print '[+] Updating %s...' % str(NmapOS.str_id)
-        resp = urllib2.urlopen(NMAP_OS_DICT_LOCATION)
 
-        fout = open(dest, 'w')
-        print '[+] Shrinking base...'
-        for line in resp:
-            if line.startswith('Fingerprint') or line.startswith('Class'):
-                fout.write(line)
-        fout.close()
-        print '[+] OK (see %s)' % dest
+        self.connect()
+        full_db = urllib2.urlopen(NMAP_OS_DICT_LOCATION)
 
-    def _load_specific(self):
-        """load entries from local file"""
-        fin = open(self.path)
-        try:
-            for line in fin:
-                self._process_line(line)
-        finally:
-            fin.close()
+        print '[+] Storing base...'
 
-    def _process_line(self, line):
-        """process a single line of the nmap OS database"""
-        if line.startswith('Fingerprint'):
-            self._item_title = line.replace('Fingerprint', '', 1)
-            self._item_title = self._item_title.strip()
+        tmp_item = None
+        for line in full_db:
+            if line.startswith('Fingerprint'):
+                tmp_item = NmapOSItem()
+                tmp_item.update(line)
+            elif line.startswith('Class'):
+                tmp_item.update(line)
+                if tmp_item is not None:
+                    tmp_item.save(self)
 
-        elif line.startswith('Class'):
-            fp_meta = line.replace('Class', '', 1)
-            fp_meta = [x.strip() for x in fp_meta.split('|')]
-            fp_meta.insert(0, self._item_title)
-            os_entry = NmapOSItem(fp_meta)
+        self.close()
 
-            self.entries.append(os_entry)
+        # XXX display statistics
+        print '[+] Update complete!'
+
+    def _make_item(self, data):
+        """
+        """
+        item = NmapOSItem()
+        # data[0] is the DB id, discard it
+        item.fields['title'] = data[1]
+        item.fields['vendor'] = data[2]
+        item.fields['product'] = data[3]
+        item.fields['version'] = data[4]
+        item.fields['devtype'] = data[5]
+
+        return item
 
 class NmapOSItem(DBEntry):
-    """represent a single entry from the Nmap OS database"""
-    def __init__(self, items):
-        """instanciate a new entry"""
-        DBEntry.__init__(self)
-        self.fields['title'] = items[0].lower()
-        self.fields['vendor'] = items[1].lower()
-        self.fields['product'] = items[2].lower()
-        self.fields['version'] = items[3].lower()
-        self.fields['devtype'] = items[4].lower()
+    """Represent a single entry from the Nmap OS database"""
+
+    def update(self, line):
+        """Process a single line of the nmap OS database"""
+        if line.startswith('Fingerprint'):
+            line = line.replace('Fingerprint', '', 1)
+            self.fields['title'] = line.strip().lower()
+        elif line.startswith('Class'):
+            line = line.replace('Class', '', 1)
+            items = [x.strip().lower() for x in line.split('|')]
+            self.fields['vendor'] = items[0]
+            self.fields['product'] = items[1]
+            self.fields['version'] = items[2]
+            self.fields['devtype'] = items[3]
+
+    def save(self, db):
+        """
+        """
+        t = (self.fields['title'],
+             self.fields['vendor'],
+             self.fields['product'],
+             self.fields['version'],
+             self.fields['devtype'])
+
+        db.cursor.execute('INSERT INTO %s'
+            ' (n_title,n_vendor,n_product,n_version,n_devtype)'
+            ' VALUES (?,?,?,?,?)' % db.str_id, t)
 
     def __str__(self):
-        """return a human readable representation"""
+        """Return a human readable representation"""
         lines = ['%s => %s' % (k, v) for k, v in self.fields.iteritems()]
         return '\n'.join(lines) + '\n'
+

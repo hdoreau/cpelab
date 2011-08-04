@@ -26,13 +26,12 @@
 """misc database utilities"""
 
 from cpelab.databases.nmapos import NmapOS
-from cpelab.databases.cpedict import CPEOS, CPEApp
+from cpelab.databases.cpedict import CPEOS
 
 
 # List of available databases
 DB_MAP = { NmapOS.str_id: NmapOS,
-           CPEOS.str_id: CPEOS,
-           CPEApp.str_id: CPEApp }
+           CPEOS.str_id: CPEOS }
 
 
 def get_db(db_spec):

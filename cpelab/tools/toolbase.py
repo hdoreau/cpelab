@@ -27,6 +27,7 @@
 
 import re
 
+from cpelab.databases.db import Database
 from cpelab.databases.utils import DBSpecParser, DBSpecError
 
 
@@ -49,15 +50,37 @@ class Tool:
         """
         raise NotImplementedError('Abstract method subclasses must implement')
 
+class InitDB(Tool):
+    """
+    """
+    str_id = 'init'
+
+    def start(self, args):
+        """
+        """
+        print '[+] Initializing the whole database...'
+        db = Database()
+        db.connect()
+        db.initialize()
+        db.close()
+        print '[+] Done! You should now run "labctl update" to populate the DB'
+
+    @classmethod
+    def help_msg(cls, err=''):
+        """return help message for the init command"""
+        return """%s
+Usage: labctl %s
+Delete existing databases and recreate a new environment""" % (err, cls.str_id)
+
 class UpdateDB(Tool):
     """download and install the latest version of the selected database(s)"""
     str_id = 'update'
 
     def start(self, args):
-        """update existing DB (or create them)"""
+        """update existing DB"""
         try:
             for db_ref in DBSpecParser(' '.join(args)):
-                db_ref.create_or_update()
+                db_ref.populate()
         except DBSpecError, err:
             raise RuntimeToolError('Invalid arguments (%s)' % str(err))
 
@@ -78,20 +101,15 @@ class StatsDB(Tool):
         """compute and display statistics about existing databases"""
         try:
             for db_ref in DBSpecParser(' '.join(args)):
-                db_ref.load()
+                db_ref.connect()
 
                 print '%s:' % db_ref.str_id
-                print '\t%d entries loaded' % len(db_ref.entries)
+                print '\t%d entries loaded' % db_ref.count()
 
-                vendors = set()
-                products = set()
+                for field in ['vendor', 'product']:
+                  print '\t%d %ss' % (db_ref.count(field), field)
 
-                for cpe in db_ref.entries:
-                    vendors.add(cpe.fields['vendor'])
-                    products.add(cpe.fields['product'])
-
-                print '\t%d vendors' % len(vendors)
-                print '\t%d products' % len(products)
+                db_ref.close()
 
         except DBSpecError, err:
             raise RuntimeToolError('Invalid arguments (%s)' % str(err))
@@ -118,24 +136,17 @@ class SearchDB(Tool):
 
         try:
             for db_ref in DBSpecParser(args[1]):
-                db_ref.load()
-                res = self.lookup(db_ref, pattern)
+                db_ref.connect()
+                res = db_ref.lookup_all(pattern)
                 if len(res) == 0:
                     print '%s: nothing found' % db_ref.str_id
                 else:
                     print '%s:' % db_ref.str_id
                     for match in res:
                         print '%s' % str(match)
+                db_ref.close()
         except DBSpecError, err:
             raise RuntimeToolError('Invalid arguments (%s)' % str(err))
-
-    def lookup(self, db, pattern):
-        """look for a given pattern within the loaded entries"""
-        res = []
-        for entry in db.entries:
-            if re.search(pattern, str(entry)) is not None:
-                res.append(entry)
-        return res
 
     @classmethod
     def help_msg(cls, err=''):

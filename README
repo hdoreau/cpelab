@@ -11,8 +11,8 @@ could then be used to make nmap directly CPE-able.
 
 INSTALL:
 
-1: create a "data" directory to store the databases
-  $ mkdir data
+1: create an empty database
+  $ ./labctl init
 
 2: download the bases
   $ ./labctl update all

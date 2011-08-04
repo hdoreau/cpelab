@@ -24,8 +24,6 @@
 
 """Implementations of translation algorithms"""
 
-from cpelab.tools.toolbase import SearchDB
-
 
 class SimpleTranslator:
     """The most simple and naive translator. Compare fields and use translation
@@ -35,7 +33,20 @@ class SimpleTranslator:
 
     def __init__(self, pattern, db0, db1):
         """initialize a new simple translator"""
-        raise NotImplementedError('Not implemented yet')
+        self._create_vendor_table(db0)
+        self._create_product_table(db0)
+
+    def _create_vendor_table(self, nmap_db):
+        """
+        """
+        self._vendors = {}
+        for item in nmap_db:
+            self._vendors[item.fields['vendor']] = []
+
+    def _create_products_table(self):
+        """
+        """
+        pass
 
 class FuzzyTranslator:
     """
@@ -48,7 +59,7 @@ class FuzzyTranslator:
         """
         print '[+] Attempting to convert entries matching: %s' % pattern
 
-        src_sigs = SearchDB().lookup(db0, pattern)
+        src_sigs = db0.lookup_all(pattern)
         if len(src_sigs) == 0:
             print '[+] No match for "%s" in source db %s' % (pattern, db0.str_id)
             return
@@ -72,23 +83,28 @@ class FuzzyTranslator:
 
     def _candidates(self, ref_entry, db):
         """returned a reduced set, with the best candidates for matching"""
+        spec = {
+            db.dbfield('vendor'): ref_entry.fields['vendor'],
+            db.dbfield('product'): ref_entry.fields['product'],
+            db.dbfield('version'): ref_entry.fields['version']
+        }
+        # look for entries matching vendor, product and version
+        candidates = db.lookup(spec)
+        if len(candidates) > 0:
+            return candidates
 
-        categories = ['vendor', 'product', 'version']
-        candidates = dict([(c, []) for c in categories])
+        # no match: don't filter on version anymore
+        del spec[db.dbfield('version')]
+        candidates = db.lookup(spec)
+        if len(candidates) > 0:
+            return candidates
 
-        for item in db.entries:
-            for cat in categories:
-                if item.fields[cat] == ref_entry.fields[cat]:
-                    candidates[cat].append(item)
-                else:
-                    break
+        # no match: don't filter on product anymore
+        del spec[db.dbfield('product')]
+        candidates = db.lookup(spec)
+        if len(candidates) > 0:
+            return candidates
 
-        categories.reverse()
-        for cat in categories:
-            if len(candidates[cat]) > 0:
-                return candidates[cat]
-
-        # no match
         return []
 
     def _matching_score(self, ref, candidate):
@@ -96,10 +112,7 @@ class FuzzyTranslator:
         entries
         """
         distance = self._levenshtein(ref.fields['title'], candidate.fields['title'])
-        if distance == 0:
-            return 2.
-        else:
-            return 1./distance
+        return 2. - distance
 
     def _levenshtein(self, str0, str1):
         """calculate and return the Levenshtein distance between two strings"""

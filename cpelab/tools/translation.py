@@ -57,8 +57,8 @@ class NmapOS2CPE(Tool):
         nmap_db = NmapOS()
         cpe_db = CPEOS()
 
-        nmap_db.load()
-        cpe_db.load()
+        nmap_db.connect()
+        cpe_db.connect()
 
         if len(args) == 2:
             if self._translators.has_key(args[1]):
@@ -69,6 +69,9 @@ class NmapOS2CPE(Tool):
             translator = self._translators[self._default_translator]
 
         translator(pattern, nmap_db, cpe_db)
+
+        nmap_db.close()
+        cpe_db.close()
 
     @classmethod
     def help_msg(cls, err=''):

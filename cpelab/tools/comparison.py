@@ -48,9 +48,13 @@ class BaseComparator(Tool):
         if db1 is None:
             raise RuntimeToolError('Unknown database: %s' % args[1])
 
-        db0.load()
-        db1.load()
+        db0.connect()
+        db1.connect()
+
         self._compare(db0, db1)
+
+        db0.close()
+        db1.close()
 
     def _compare(self, db0, db1):
         """comparison function. Compute and display resutls"""
@@ -72,16 +76,19 @@ class VendorDiff(BaseComparator):
         """Select vendors that are exclusively in db0 (displayed with a '+'
         prefix) or exclusively in db1 (displayed with a '-' prefix.
         """
-        vendors0 = set([entry.fields['vendor'] for entry in db0.entries])
-        vendors1 = set([entry.fields['vendor'] for entry in db1.entries])
+        self._do_query(db0, db1)
+        for vendor in db0.cursor.fetchall():
+            print '+%s' % vendor[0]
 
-        res = vendors0 - vendors1
-        for vendor in res:
-            print '+ %s' % vendor
+        self._do_query(db1, db0)
+        for vendor in db1.cursor.fetchall():
+            print '-%s' % vendor[0]
 
-        res = vendors1 - vendors0
-        for vendor in res:
-            print '- %s' % vendor
+    def _do_query(self, db0, db1):
+        """
+        """
+        db0.cursor.execute('select distinct %(db0)s.%(f0)s from %(db0)s where not exists (select id from %(db1)s where %(db1)s.%(f1)s = %(db0)s.%(f0)s)' \
+            % {'db0': db0.str_id, 'db1': db1.str_id, 'f0': db0.dbfield('vendor'), 'f1': db1.dbfield('vendor')})
 
     @classmethod
     def help_msg(cls, err=''):
@@ -96,12 +103,12 @@ class VendorCommon(BaseComparator):
 
     def _compare(self, db0, db1):
         """display vendors found in both databases"""
-        vendors0 = set([entry.fields['vendor'] for entry in db0.entries])
-        vendors1 = set([entry.fields['vendor'] for entry in db1.entries])
+        # select distinct nmapos.n_vendor from nmapos where exists (select id from cpeos where cpe_vendor = nmapos.n_vendor)
+        db0.cursor.execute('select distinct %(f0)s from %(db0)s where exists (select id from %(db1)s where %(f1)s = %(db0)s.%(f0)s)' \
+            % {'db0': db0.str_id, 'db1': db1.str_id, 'f0':db0.dbfield('vendor'), 'f1':db1.dbfield('vendor')})
 
-        res = vendors0 & vendors1
-        for vendor in res:
-            print vendor
+        for vendor in db0.cursor.fetchall():
+            print vendor[0]
 
     @classmethod
     def help_msg(cls, err=''):

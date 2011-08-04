@@ -29,13 +29,15 @@
 import sys
 
 from cpelab.databases.utils import DBSpecParser, DBSpecError
-from cpelab.tools.toolbase import RuntimeToolError, UpdateDB, StatsDB, SearchDB
+from cpelab.tools.toolbase import RuntimeToolError, InitDB, UpdateDB, StatsDB
+from cpelab.tools.toolbase import SearchDB
 from cpelab.tools.comparison import VendorDiff, VendorCommon
 from cpelab.tools.translation import NmapOS2CPE
 
 
 # List of available processing modules
 TOOLS_MAP = {
+    InitDB.str_id: InitDB,
     UpdateDB.str_id: UpdateDB,
     StatsDB.str_id: StatsDB,
     SearchDB.str_id: SearchDB,

@@ -58,152 +58,165 @@ class CachedDict:
         return cls.fcached
 
 class CPEOS(Database):
-    """CPE dictionnary subset: operating systems and hardware"""
+    """CPE dictionary subset: operating systems and hardware"""
 
-    str_id = 'cpe-os'
+    str_id = 'cpeos'
 
-    def create_or_update(self):
+    def __init__(self):
         """
         """
-        dest = self.path
+        Database.__init__(self)
+        self.fields_map = {
+            'title': 'cpe_title',
+            'name': 'cpe_name',
+            'part': 'cpe_part',
+            'vendor': 'cpe_vendor',
+            'product': 'cpe_product',
+            'version': 'cpe_version',
+            'update': 'cpe_update',
+            'edition': 'cpe_edition',
+            'language': 'cpe_language'
+        }
+        self._search_fields = ['cpe_title', 'cpe_name']
 
+    def populate(self):
+        """
+        """
         print '[+] Updating %s...' % str(CPEOS.str_id)
+
+        self.connect()
         full_db = CachedDict.get()
 
-        fout = open(dest, 'w')
-        print '[+] Shrinking base...'
-        xml.sax.parse(full_db, CPEFilter(fout, 'oh'))
+        print '[+] Storing base...'
 
-        fout.close()
-        print '[+] OK (see %s)' % dest
+        xml.sax.parse(full_db, CPEFilter(self, 'oh'))
 
-    def _load_specific(self):
-        """load entries from the filesystem"""
-        xml.sax.parse(self.path, CPELoader(self))
+        self.close()
 
-class CPEApp(Database):
-    """CPE dictionnary subset: applications"""
+        # XXX display statistics
+        print '[+] Update complete!'
 
-    str_id = 'cpe-app'
-
-    def create_or_update(self):
+    def _make_item(self, data):
         """
         """
-        dest = self.path
+        item = CPEItem()
+        # data[0] is the DB id, discard it
+        item.update({'title': data[1], 'name': data[2]})
+        return item
 
-        print '[+] Updating %s...' % str(CPEApp.str_id)
-        full_db = CachedDict.get()
 
-        fout = open(dest, 'w')
-        print '[+] Shrinking base...'
-        xml.sax.parse(full_db, CPEFilter(fout, 'a'))
+#class CPEApp(Database):
+#    """CPE dictionary subset: applications"""
+#
+#    str_id = 'cpe-app'
+#
+#    def create_or_update(self):
+#        """
+#        """
+#        dest = self.path
+#
+#        print '[+] Updating %s...' % str(CPEApp.str_id)
+#        full_db = CachedDict.get()
+#
+#        fout = open(dest, 'w')
+#        print '[+] Shrinking base...'
+#        xml.sax.parse(full_db, CPEFilter(fout, 'a'))
+#
+#        fout.close()
+#        print '[+] OK (see %s)' % dest
+#
+#    def _load_specific(self):
+#        """load entries from the filesystem"""
+#        xml.sax.parse(self.path, CPELoader(self))
 
-        fout.close()
-        print '[+] OK (see %s)' % dest
-
-    def _load_specific(self):
-        """load entries from the filesystem"""
-        xml.sax.parse(self.path, CPELoader(self))
-
-class CPEFilter(XMLGenerator):
+class CPEFilter(ContentHandler):
     """produce a reduced CPE dict with only non-deprecated OS related entries"""
-    def __init__(self, out, valid_parts):
+    def __init__(self, db, valid_parts):
         """instanciate a new filter"""
-        XMLGenerator.__init__(self, out)
-        self._reproduce = False
-        self._discard_tag = ''
+        ContentHandler.__init__(self)
+        self.db = db
+        self._tmp_item = None
         self._valid_parts = valid_parts
+
+        # internal parsing flag
+        self._in_title = False
+        self._discard = False
+
+        self._curr_title = []
 
     def startElement(self, name, attrs):
         """callback: opening tag. Only keep OS related item, discard deprecated
         entries and non en-US titles.
         """
-        if name == 'cpe-item' and not attrs.has_key('deprecated'):
-            # 5th char of a CPE name is the part (cpe:/a:...)
-            if attrs['name'][5] in self._valid_parts:
-                self._reproduce = True
-                attrs = {'name': attrs['name']} # discard all metadata
-
-        if name == 'meta:item-metadata' or (name == 'title' and attrs['xml:lang'] != 'en-US'):
-            self._discard_tag = name
+        if self._discard:
             return
 
-        if self._reproduce or name == 'cpe-list':
-            XMLGenerator.startElement(self, name, attrs)
-
-    def endElement(self, name):
-        """callback: ending tag. Reproduce if this was a valid one"""
-        if name == self._discard_tag:
-            self._discard_tag = ''
-            return
-
-        if self._reproduce or name == 'cpe-list':
-            XMLGenerator.endElement(self, name)
-
         if name == 'cpe-item':
-            self._reproduce = False
-
-    def characters(self, content):
-        """callback: text. reproduce if this was contained within a valid tag"""
-        if self._discard_tag == '' and self._reproduce:
-            XMLGenerator.characters(self, content)
-
-class CPELoader(ContentHandler):
-    """SAX content handler to load entries from the XML dictionary"""
-    def __init__(self, cpedict):
-        """
-        """
-        ContentHandler.__init__(self)
-        self._cpe_dict = cpedict
-
-        self._in_title = False
-        self._name = ''
-        self._title = ''
-
-    def startElement(self, name, attrs):
-        """callback: entering section"""
-        if name == 'cpe-item':
-            self._name = attrs['name']
-        elif name == 'title':
+            if attrs.has_key('deprecated'):
+                self._discard = True
+            else:
+                # 5th char of a CPE name is the part (cpe:/a:...)
+                if attrs['name'][5] in self._valid_parts:
+                    self._tmp_item = CPEItem()
+                    self._tmp_item.update({'name': attrs['name']})
+                else:
+                    self._discard = True
+        elif (not self._discard) and (name == 'title') and (attrs['xml:lang'] == 'en-US'):
+            self._curr_title = []
             self._in_title = True
 
     def endElement(self, name):
-        """callback: leaving section"""
-        if name == 'title':
-            self._in_title = False
-        elif name == 'cpe-item':
-            if len(self._title) > 0 and len(self._name) > 0:
-                self._cpe_dict.entries.append(CPEItem(self._title, self._name))
-
-            self._name = ''
-            self._title = ''
+        """callback: ending tag. Reproduce if this was a valid one"""
+        if name == 'cpe-item':
+            if self._tmp_item is not None:
+                self._tmp_item.save(self.db)
+            self._tmp_item = None
+            self._discard = False
+        elif name == 'title':
+            if self._in_title:
+                self._tmp_item.update({'title': ''.join(self._curr_title)})
+                self._curr_title = []
+                self._in_title = False
 
     def characters(self, content):
-        """callback: text to read"""
+        """callback: text. reproduce if this was contained within a valid tag"""
         if self._in_title:
-            self._title += content
+            self._curr_title.append(content)
 
 class CPEItem(DBEntry):
     """represent a single entry from the CPE dictionary"""
-    def __init__(self, title, name):
-        """instanciate a new entry"""
-        DBEntry.__init__(self)
 
-        self.fields['title'] = title.lower()
-        self.fields['name'] = name.lower()
+    def update(self, components):
+        """Update an existing instance"""
+        if components.has_key('title'):
+            self.fields['title'] = components['title'].lower()
+        if components.has_key('name'):
+            name = components['name'].lower()
+            self.fields['name'] = name
 
-        name = name[5::]
-        items = name.split(':')
-        while len(items) < 7:
-            items.append('')
+            name = name[5::]
+            items = name.split(':')
+            while len(items) < 7:
+                items.append('')
 
-        self.fields['part'] = items[0]
-        self.fields['vendor'] = items[1]
-        self.fields['product'] = items[2]
-        self.fields['version'] = items[3]
-        self.fields['udpate'] = items[4]
-        self.fields['edition'] = items[5]
-        self.fields['language'] = items[6]
+            self.fields['part'] = items[0]
+            self.fields['vendor'] = items[1]
+            self.fields['product'] = items[2]
+            self.fields['version'] = items[3]
+            self.fields['update'] = items[4]
+            self.fields['edition'] = items[5]
+            self.fields['language'] = items[6]
+
+    def save(self, db):
+        """
+        """
+        fields = ['title', 'name', 'part', 'vendor', 'product', 'version',
+            'update', 'edition', 'language']
+
+        t = tuple([self.fields[x] for x in fields])
+        fdesc = ','.join(['cpe_' + x for x in fields])
+
+        db.cursor.execute('INSERT INTO %s (%s) VALUES (?,?,?,?,?,?,?,?,?)' % (db.str_id, fdesc), t)
 
     def __str__(self):
         """return a human readable representation"""

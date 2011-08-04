@@ -26,36 +26,114 @@
 """base cpelab databases manipulation module"""
 
 import os
+import sqlite3
+
+DATADIR = 'data'
+SQLITE_DB_FILE = 'cpelab.db'
+SQLITE_INIT_SCRIPT = 'cpelab_init.sql'
 
 
 class Database:
     """Base (abstract) class for DB. Define a common interface for subclasses"""
-    
+
     str_id = None
 
     def __init__(self):
-        """instanciate a new DB"""
-        self.loaded = False
-        self.entries = []
-        self.path = os.path.join(os.getcwd(), 'data', self.str_id)
+        """Initialize a new DB"""
+        self.path = os.path.join(os.getcwd(), DATADIR, SQLITE_DB_FILE)
+        self.conn = None
+        self.cursor = None
+        self.fields_map = {}
+        self._search_fields = []
 
-    def load(self):
-        """load DB information from the filesystem if not done yet"""
-        if not self.loaded:
-            self._load_specific()
-            self.loaded = True
+    def connect(self):
+        """Open connection to the database"""
+        self.conn = sqlite3.connect(self.path)
+        self.cursor = self.conn.cursor()
 
-    def create_or_update(self):
-        """Download and extract latest version of the database"""
-        raise NotImplementedError('Abstract method subclasses must implement')
+    def close(self):
+        """Release connections to the database"""
+        if self.cursor is None or self.conn is None:
+            raise DBError('Invalid close!')
 
-    def _load_specific(self):
-        """Actually load information from the database into memory"""
-        raise NotImplementedError('Abstract method subclasses must implement')
+        # commit pending operations
+        self.conn.commit()
+
+        self.cursor.close()
+        self.conn.close()
+
+    def initialize(self):
+        """Call the DB initialization script. Delete everything and re-create
+        empty tables"""
+        initfile = os.path.join(os.getcwd(), DATADIR, SQLITE_INIT_SCRIPT)
+        fin = open(initfile)
+        self.cursor.executescript(fin.read())
+        fin.close()
+
+    def count(self, field=None):
+        """
+        """
+        if field is None:
+            # default: count the number of items
+            self.cursor.execute('select COUNT(*) from %s' % self.str_id)
+            return self.cursor.fetchone()
+        else:
+            # count unique entries for a given field
+            self.cursor.execute('select COUNT(*) from (select distinct %s from %s)' \
+                % (self.dbfield(field), self.str_id))
+            return self.cursor.fetchone()[0]
+
+    def lookup(self, spec, strict=True):
+        """
+        """
+        # TODO make a light and efficient iterator
+        items = []
+        if strict:
+            cmp = '='
+        else:
+            cmp = 'like'
+        
+        filter = []
+        elems = []
+        for k, v in spec.iteritems():
+            filter.append('%s %s ?' % (k, cmp))
+            elems.append(v)
+        filter = ' and '.join(filter)
+        query = 'select * from %s where (%s)' % (self.str_id, filter)
+        self.cursor.execute(query, tuple(elems))
+        for res in self.cursor.fetchall():
+            items.append(self._make_item(res))
+        return items
+
+    def lookup_all(self, pattern):
+        """
+        """
+        items = []
+        for field in self._search_fields:
+            items += self.lookup({field: pattern}, strict=False)
+        return items
+
+    def dbfield(self, field):
+        """
+        """
+        return self.fields_map[field]
+
+    def _make_item(self):
+        """
+        """
+        raise NotImplementedError('Abstract method subclasses must implement!')
 
 class DBEntry:
     """Represent a single database item"""
     def __init__(self):
         """instanciate a new item"""
         self.fields = {}
+
+    def save(self, db):
+        """
+        """
+        raise NotImplementedError('Abstract method subclasses must implement')
+
+class DBError(Exception):
+    """Base error raised on invalid DB operations"""
 
