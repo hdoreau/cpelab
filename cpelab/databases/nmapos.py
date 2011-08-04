@@ -62,8 +62,9 @@ class NmapOS(Database):
 
         print '[+] Storing base...'
 
+        fin = open(full_db)
         tmp_item = None
-        for line in full_db:
+        for line in fin:
             if line.startswith('Fingerprint'):
                 tmp_item = NmapOSItem()
                 tmp_item.update(line)
@@ -72,6 +73,7 @@ class NmapOS(Database):
                 if tmp_item is not None:
                     tmp_item.save(self)
 
+        fin.close()
         self.close()
 
         # XXX display statistics
