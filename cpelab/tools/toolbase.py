@@ -63,7 +63,7 @@ class InitDB(Tool):
         db.connect()
         db.initialize()
         db.close()
-        print '[+] Done! You should now run "labctl update" to populate the DB'
+        print '[+] Done! You should now run "labctl update all" to populate the DB'
 
     @classmethod
     def help_msg(cls, err=''):
