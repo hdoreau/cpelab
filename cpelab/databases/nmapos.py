@@ -25,7 +25,7 @@
 
 """Nmap OS database manipulation module"""
 
-import urllib2
+import urllib
 
 from cpelab.databases.db import Database, DBEntry
 
@@ -58,7 +58,7 @@ class NmapOS(Database):
         print '[+] Updating %s...' % str(NmapOS.str_id)
 
         self.connect()
-        full_db = urllib2.urlopen(NMAP_OS_DICT_LOCATION)
+        full_db, _ = urllib.urlretrieve(NMAP_OS_DICT_LOCATION)
 
         print '[+] Storing base...'
 
