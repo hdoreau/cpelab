@@ -102,7 +102,7 @@ class StatsDB(Tool):
                 print '\t%d entries loaded' % db_ref.count()
 
                 for field in ['vendor', 'product']:
-                  print '\t%d %ss' % (db_ref.count(field), field)
+                    print '\t%d %ss' % (db_ref.count(field), field)
 
                 db_ref.close()
 
