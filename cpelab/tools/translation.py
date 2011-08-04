@@ -26,7 +26,6 @@
 """Processing modules to perform DB translations"""
 
 from cpelab.tools.toolbase import Tool, RuntimeToolError
-from cpelab.databases.utils import get_db
 
 from cpelab.databases.nmapos import NmapOS
 from cpelab.databases.cpedict import CPEOS
