@@ -25,8 +25,6 @@
 
 """Base classes for processing modules"""
 
-import re
-
 from cpelab.databases.db import Database
 from cpelab.databases.utils import DBSpecParser, DBSpecError
 
