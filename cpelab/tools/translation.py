@@ -64,7 +64,7 @@ class FuzzyTranslator:
         """
         print '[+] Attempting to convert entries matching: %s' % pattern
 
-        src_sigs = db0.lookup_all(pattern)
+        src_sigs = list(db0.lookup_all(pattern))
         if len(src_sigs) == 0:
             print '[+] No match for "%s" in source db %s' % (pattern, db0.str_id)
             return
@@ -94,19 +94,19 @@ class FuzzyTranslator:
             'version': ref_entry.fields['version']
         }
         # look for entries matching vendor, product and version
-        candidates = db.lookup(spec)
+        candidates = list(db.lookup(spec))
         if len(candidates) > 0:
             return candidates
 
         # no match: don't filter on version anymore
         del spec['version']
-        candidates = db.lookup(spec)
+        candidates = list(db.lookup(spec))
         if len(candidates) > 0:
             return candidates
 
         # no match: don't filter on product anymore
         del spec['product']
-        candidates = db.lookup(spec)
+        candidates = list(db.lookup(spec))
         if len(candidates) > 0:
             return candidates
 
@@ -159,9 +159,6 @@ class NmapOS2CPE(Tool):
         nmap_db = NmapOS()
         cpe_db = CPEOS()
 
-        nmap_db.connect()
-        cpe_db.connect()
-
         if len(args) == 2:
             if self._translators.has_key(args[1]):
                 translator = self._translators[args[1]]
@@ -171,9 +168,6 @@ class NmapOS2CPE(Tool):
             translator = self._translators[self._default_translator]
 
         translator(pattern, nmap_db, cpe_db)
-
-        nmap_db.close()
-        cpe_db.close()
 
     @classmethod
     def help_msg(cls, err=''):

@@ -62,14 +62,14 @@ class CPEOS(Database):
         """Load items into the corresponding table of the database."""
         print '[+] Updating %s...' % str(CPEOS.str_id)
 
-        self.connect()
-        full_db, _ = urllib.urlretrieve(CPE_DICT_LOCATION)
+        #full_db, _ = urllib.urlretrieve(CPE_DICT_LOCATION)
+        full_db = "official-cpe-dictionary_v2.2.xml"
 
         print '[+] Storing base...'
 
         xml.sax.parse(full_db, CPEFilter(self, 'oh'))
 
-        self.close()
+        self.db_cnx.commit()
 
         # XXX display statistics
         print '[+] Update complete!'
@@ -167,7 +167,7 @@ class CPEItem(DBEntry):
         t = tuple([self.fields[x] for x in fields])
         fdesc = ','.join(['cpe_' + x for x in fields])
 
-        db.cursor.execute('INSERT INTO %s (%s) VALUES (?,?,?,?,?,?,?,?,?)' % (db.str_id, fdesc), t)
+        db.db_cnx.execute('INSERT INTO %s (%s) VALUES (?,?,?,?,?,?,?,?,?)' % (db.str_id, fdesc), t)
 
     def __str__(self):
         """Return a human readable representation."""

@@ -41,33 +41,18 @@ class Database:
     def __init__(self):
         """Initialize a new DB."""
         self.path = os.path.join(os.getcwd(), DATADIR, SQLITE_DB_FILE)
-        self.conn = None
-        self.cursor = None
+        self.db_cnx = sqlite3.connect(self.path)  # eager connection
         self.fields_map = {}
         self._search_fields = []
 
-    def connect(self):
-        """Open connection to the database."""
-        self.conn = sqlite3.connect(self.path)
-        self.cursor = self.conn.cursor()
-
-    def close(self):
-        """Release connections to the database."""
-        if self.cursor is None or self.conn is None:
-            raise DBError('Invalid close!')
-
-        # commit pending operations
-        self.conn.commit()
-
-        self.cursor.close()
-        self.conn.close()
-
     def initialize(self):
         """Call the DB initialization script. Delete everything and re-create
-        empty tables."""
+        empty tables.
+        """
         initfile = os.path.join(os.getcwd(), DATADIR, SQLITE_INIT_SCRIPT)
         fin = open(initfile)
-        self.cursor.executescript(fin.read())
+        self.db_cnx.executescript(fin.read())
+        self.db_cnx.commit()
         fin.close()
 
     def count(self, field=None):
@@ -76,13 +61,13 @@ class Database:
         """
         if field is None:
             # default: count the number of items
-            self.cursor.execute('select COUNT(*) from %s' % self.str_id)
-            return self.cursor.fetchone()
+            cursor = self.db_cnx.execute('select COUNT(*) from %s' % self.str_id)
+            return cursor.fetchone()
         else:
             # count unique entries for a given field
-            self.cursor.execute('select COUNT(*) from (select distinct %s from %s)' \
+            cursor = self.db_cnx.execute('select COUNT(*) from (select distinct %s from %s)' \
                 % (self.dbfield(field), self.str_id))
-            return self.cursor.fetchone()[0]
+            return cursor.fetchone()[0]
 
     def lookup(self, spec, strict=True):
         """Perform lookup queries on the database.
@@ -97,8 +82,6 @@ class Database:
         The strict arguments allows you to choose between a strict matching mode
         ('field = value') or a more flexible one ('field like pattern').
         """
-        # TODO make a light and efficient iterator
-        items = []
         if strict:
             op = '='
         else:
@@ -111,10 +94,8 @@ class Database:
             elems.append(v)
         search_filter = ' and '.join(search_filter)
         query = 'select * from %s where (%s)' % (self.str_id, search_filter)
-        self.cursor.execute(query, tuple(elems))
-        for res in self.cursor.fetchall():
-            items.append(self._make_item(res))
-        return items
+        for res in self.db_cnx.execute(query, tuple(elems)):
+            yield self._make_item(res)
 
     def lookup_all(self, pattern):
         """Provided for conveniency, look for pattern on all the search-relevant

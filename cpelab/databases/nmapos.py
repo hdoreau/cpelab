@@ -57,8 +57,8 @@ class NmapOS(Database):
         """
         print '[+] Updating %s...' % str(NmapOS.str_id)
 
-        self.connect()
-        full_db, _ = urllib.urlretrieve(NMAP_OS_DICT_LOCATION)
+        #full_db, _ = urllib.urlretrieve(NMAP_OS_DICT_LOCATION)
+        full_db = "nmap-os-db"
 
         print '[+] Storing base...'
 
@@ -72,9 +72,9 @@ class NmapOS(Database):
                 tmp_item.update(line)
                 if tmp_item is not None:
                     tmp_item.save(self)
-
         fin.close()
-        self.close()
+
+        self.db_cnx.commit()
 
         # XXX display statistics
         print '[+] Update complete!'
@@ -115,7 +115,7 @@ class NmapOSItem(DBEntry):
              self.fields['version'],
              self.fields['devtype'])
 
-        db.cursor.execute('INSERT INTO %s'
+        db.db_cnx.execute('INSERT INTO %s'
             ' (n_title,n_vendor,n_product,n_version,n_devtype)'
             ' VALUES (?,?,?,?,?)' % db.str_id, t)
 

@@ -33,6 +33,10 @@ from cpelab.databases.utils import get_db
 class BaseComparator(Tool):
     """Base abstract class to implement 2 db comparison tools"""
 
+    def __init__(self):
+        """Initialize a new comparator instance."""
+        Tool.__init__(self)
+
     def start(self, args):
         """Tool entry point. targets is a list of (two) db instances to
         compare.
@@ -48,13 +52,7 @@ class BaseComparator(Tool):
         if db1 is None:
             raise RuntimeToolError('Unknown database: %s' % args[1])
 
-        db0.connect()
-        db1.connect()
-
         self._compare(db0, db1)
-
-        db0.close()
-        db1.close()
 
     def _compare(self, db0, db1):
         """Comparison function. Compute and display results."""
@@ -78,17 +76,15 @@ class VendorDiff(BaseComparator):
         """Select vendors that are exclusively in db0 (displayed with a '+'
         prefix) or exclusively in db1 (displayed with a '-' prefix.
         """
-        self._do_query(db0, db1)
-        for vendor in db0.cursor.fetchall():
+        for vendor in self._query(db0, db1):
             print '+%s' % vendor[0]
 
-        self._do_query(db1, db0)
-        for vendor in db1.cursor.fetchall():
+        for vendor in self._query(db1, db0):
             print '-%s' % vendor[0]
 
-    def _do_query(self, db0, db1):
+    def _query(self, db0, db1):
         """Look for items that are exclusively present in db0."""
-        db0.cursor.execute('select distinct %(db0)s.%(f0)s from %(db0)s where not exists (select id from %(db1)s where %(db1)s.%(f1)s = %(db0)s.%(f0)s)' \
+        return db0.db_cnx.execute('select distinct %(db0)s.%(f0)s from %(db0)s where not exists (select id from %(db1)s where %(db1)s.%(f1)s = %(db0)s.%(f0)s)' \
             % {'db0': db0.str_id, 'db1': db1.str_id, 'f0': db0.dbfield('vendor'), 'f1': db1.dbfield('vendor')})
 
     @classmethod
@@ -105,10 +101,10 @@ class VendorCommon(BaseComparator):
     def _compare(self, db0, db1):
         """Display vendors found in both databases."""
         # select distinct nmapos.n_vendor from nmapos where exists (select id from cpeos where cpe_vendor = nmapos.n_vendor)
-        db0.cursor.execute('select distinct %(f0)s from %(db0)s where exists (select id from %(db1)s where %(f1)s = %(db0)s.%(f0)s)' \
+        cursor = db0.db_cnx.execute('select distinct %(f0)s from %(db0)s where exists (select id from %(db1)s where %(f1)s = %(db0)s.%(f0)s)' \
             % {'db0': db0.str_id, 'db1': db1.str_id, 'f0':db0.dbfield('vendor'), 'f1':db1.dbfield('vendor')})
 
-        for vendor in db0.cursor.fetchall():
+        for vendor in cursor:
             print vendor[0]
 
     @classmethod

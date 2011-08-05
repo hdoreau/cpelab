@@ -33,6 +33,10 @@ class Tool:
     """Abstract base class for processing modules."""
     str_id = None
 
+    def __init__(self):
+        """Initialize a new Tool instance."""
+        pass
+
     def start(self, args):
         """Module entry point."""
         raise NotImplementedError('Abstract method subclasses must implement')
@@ -53,9 +57,7 @@ class InitDB(Tool):
         """Reset existing DB if exists and setup a new empty one."""
         print '[+] Initializing the whole database...'
         db = Database()
-        db.connect()
         db.initialize()
-        db.close()
         print '[+] Done! You should now run "labctl update all" to populate the DB'
 
     @classmethod
@@ -94,15 +96,11 @@ class StatsDB(Tool):
         """Compute and display statistics about existing databases."""
         try:
             for db_ref in DBSpecParser(' '.join(args)):
-                db_ref.connect()
-
                 print '%s:' % db_ref.str_id
                 print '\t%d entries loaded' % db_ref.count()
 
                 for field in ['vendor', 'product']:
                     print '\t%d %ss' % (db_ref.count(field), field)
-
-                db_ref.close()
 
         except DBSpecError, err:
             raise RuntimeToolError('Invalid arguments (%s)' % str(err))
@@ -127,7 +125,6 @@ class SearchDB(Tool):
 
         try:
             for db_ref in DBSpecParser(args[1]):
-                db_ref.connect()
                 res = db_ref.lookup_all(pattern)
                 if len(res) == 0:
                     print '%s: nothing found' % db_ref.str_id
@@ -136,7 +133,6 @@ class SearchDB(Tool):
                     for match in res:
                         print '%s' % str(match)
                     print "%d matching items in %s" % (len(res), db_ref.str_id)
-                db_ref.close()
         except DBSpecError, err:
             raise RuntimeToolError('Invalid arguments (%s)' % str(err))
 
