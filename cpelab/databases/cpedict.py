@@ -62,8 +62,8 @@ class CPEOS(Database):
         """Load items into the corresponding table of the database."""
         print '[+] Updating %s...' % str(CPEOS.str_id)
 
-        #full_db, _ = urllib.urlretrieve(CPE_DICT_LOCATION)
-        full_db = "official-cpe-dictionary_v2.2.xml"
+        full_db, _ = urllib.urlretrieve(CPE_DICT_LOCATION)
+        #full_db = "official-cpe-dictionary_v2.2.xml"
 
         print '[+] Storing base...'
 

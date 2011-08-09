@@ -57,8 +57,8 @@ class NmapOS(Database):
         """
         print '[+] Updating %s...' % str(NmapOS.str_id)
 
-        #full_db, _ = urllib.urlretrieve(NMAP_OS_DICT_LOCATION)
-        full_db = "nmap-os-db"
+        full_db, _ = urllib.urlretrieve(NMAP_OS_DICT_LOCATION)
+        #full_db = "nmap-os-db"
 
         print '[+] Storing base...'
 
