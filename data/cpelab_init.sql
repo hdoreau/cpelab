@@ -15,6 +15,8 @@ CREATE TABLE nmapos (
   n_version VARCHAR(20) DEFAULT NULL,
   n_devtype VARCHAR(20) DEFAULT NULL
 );
+CREATE INDEX nmapos_vendor_idx ON nmapos (n_vendor);
+CREATE INDEX nmapos_produc_idx ON nmapos (n_product);
 
 CREATE TABLE cpeos (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,4 +32,7 @@ CREATE TABLE cpeos (
   deprecated BOOLEAN DEFAULT FALSE,
   last_update DATE DEFAULT (date())
 );
+CREATE INDEX cpeos_name_idx ON cpeos (cpe_name);
+CREATE INDEX cpeos_vendor_idx ON cpeos (cpe_vendor);
+CREATE INDEX cpeos_product_idx ON cpeos (cpe_product);
 
